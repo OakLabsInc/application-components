@@ -1,6 +1,5 @@
 syntax = "proto3";
 
-import "google/protobuf/empty.proto";
 import "providers/payment/freedompay.proto";
 
 package oak.platform;
@@ -15,16 +14,18 @@ service Payment {
 
   // Shows whether application is running, whether it crashed if it is
   // not running, and the time that it entered its current state.
-  rpc Info (google.protobuf.Empty) returns (PaymentServiceInfo) {}
+  rpc Info (Empty) returns (PaymentServiceInfo) {}
 
   // This must be run after the service starts and before running any transactions.
   // The purpose of this service is to choose a payment provider and associated options.
-  rpc Configure (PaymentConfiguration) returns (google.protobuf.Empty) {}
+  rpc Configure (PaymentConfiguration) returns (Empty) {}
 
   // The Sale service performs an Authorization and Capture.  This makes it a convenient
   // single transaction which will perform a sale.
   rpc Sale (SaleRequest) returns (SaleResponse) {}
 }
+
+message Empty {}
 
 message PaymentServiceInfo {
 
