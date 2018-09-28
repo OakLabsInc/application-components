@@ -1,0 +1,22 @@
+{
+  "name": "module-payment",
+  "version": "0.0.1",
+  "description": "Payments module for OakOS Platform",
+  "main": "src/index.js",
+  "dependencies": {
+    "grpc": "^1.14.1",
+    "lodash": "^4.17.10",
+    "oak-tools": "^0.5.7",
+    "protobufjs": "^6.8.8"
+  },
+  "scripts": {
+    "start": "node src/"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "faucet": "0.0.1",
+    "tape": "^4.9.1",
+    "torch": "^0.2.7"
+  }
+}
