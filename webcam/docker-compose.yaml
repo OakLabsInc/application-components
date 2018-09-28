@@ -5,7 +5,7 @@ services:
 
   server:
     build: .
-    image: oaklabs/platform-webcam:${VERSION-latest}
+    image: oaklabs/webcam:${VERSION-latest}
     network_mode: host
     environment:
       - PORT=9101
