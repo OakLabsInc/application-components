@@ -1,0 +1,16 @@
+---
+version: '3'
+
+services:
+
+  server:
+    build: .
+    image: oaklabs/platform-oak-lights:${VERSION-latest}
+    network_mode: host
+    environment:
+      - PORT=9100
+    devices:
+      - /dev
+    volumes:
+      - /dev:/dev
+      - ./src:/src/
