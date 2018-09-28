@@ -1,0 +1,11 @@
+---
+version: '3'
+
+services:
+
+  server:
+    build: .
+    image: oaklabs/google-fluentd:${VERSION-latest}
+    volumes:
+      - ./google-fluentd.conf:/etc/google-fluentd/google-fluentd.conf
+      - ./gcp-credentials.json:/etc/google/auth/application_default_credentials.json
