@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package oak.vendor;
+package oak.application;
 
 // Manage streams from webcams connected to the host.
 //
