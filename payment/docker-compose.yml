@@ -7,5 +7,10 @@ services:
     build: .
     image: oaklabs/payment:${VERSION-latest}
     environment:
+      - PORT=9102
       - DEBUG=true
       - NODE_ENV=development
+    volumes:
+      - ./src:/app/src/
+      - ./test:/app/test/
+      - ./protos:/protos/

@@ -1,11 +1,9 @@
 const {test} = require('tape')
 const grpc = require('grpc')
-const {inspect} = require('util')
-const torch = require('torch')
 
 const paymentService = require('..')
 const {PROTO_PATH} = paymentService
-const host = '0.0.0.0:8008'
+const host = `0.0.0.0:${process.env.PORT}`
 
 test('should start the service', (t) => {
   paymentService({host}, t.end)
@@ -13,7 +11,7 @@ test('should start the service', (t) => {
 
 let client
 test('should create a client', (t) => {
-  const {Payment} = grpc.load(PROTO_PATH).oak.platform
+  const {Payment} = grpc.load(PROTO_PATH).oak.application
   client = new Payment(host, grpc.credentials.createInsecure())
   t.end()
 })
@@ -30,7 +28,7 @@ test('should configure the service', (t) => {
   client.Configure({
     providers: [{
       provider_name: 'test_provider',
-      provider_type: 'TEST',
+      provider_type: 'TEST'
     }]
   }, (err) => {
     t.error(err)
@@ -89,4 +87,4 @@ test('should process a sale', (t) => {
 // otherwise the server will keep the process open
 // don't know of a way to programmatically stop the GRPC server
 // maybe reading documentation would help.  :-)
-test('should exit', (t) => {t.end(); process.exit()})
+test('should exit', (t) => { t.end(); process.exit() })

@@ -2,7 +2,7 @@ syntax = "proto3";
 
 import "providers/payment/freedompay.proto";
 
-package oak.platform;
+package oak.application;
 
 /*
 Unified payment service which supports multiple payment providers.

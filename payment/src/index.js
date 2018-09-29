@@ -87,7 +87,7 @@ function main (opts = {}, done = (err) => {if (err) logger.error(err)}) {
   root.load(PROTO_PATH, {keepCase: true}, (err, protoDef) => {
     if (err) return done(err)
     const protoPkg = grpc.loadObject(protoDef)
-    const grpcService = protoPkg.oak.platform.Payment.service
+    const grpcService = protoPkg.oak.application.Payment.service
 
     server.addService(grpcService, Implementation)
     server.bind(host, grpc.ServerCredentials.createInsecure())

@@ -1,4 +1,4 @@
-# payments
+# Payments
 
 # Setup
 
@@ -14,21 +14,11 @@ npm i
 # Run the tests
 
 ```
-node test/test_provider.js
+docker-compose run --rm server node test/test_provider.js
 ```
 
 # Build and run the container
 
 ```
 docker-compose up --build
-```
-
-# Update the protobuf definitions
-
-```
-cd protos
-git checkout [some branch or commit]
-cd .. // to root of project
-git status
-git commit -a // or whatever you like... submodule version will look like a file change
 ```

@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package oak.platform;
+package oak.application;
 
 // Control an Oak USB Lighting Controller.
 //
