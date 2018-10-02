@@ -1,0 +1,23 @@
+---
+version: '3'
+
+volumes:
+  app-persistent-storage:
+
+services:
+
+  app:
+    build: .
+    image: oaklabs/filesync:latest
+    volumes:
+      - /dev/shm:/dev/shm
+      - app-persistent-storage:/persistent
+      - ./filesync:/src/filesync:ro
+      - ./bin:/src/bin:ro
+      - ./conf:/conf:ro
+    environment:
+      - SYNC_DIR=/persistent/files
+      - GS_URL=${GS_URL-gs://filefiesta/oak-dev-aaron}
+      - INTERVAL=600
+    ports:
+      - "9500:9500"
