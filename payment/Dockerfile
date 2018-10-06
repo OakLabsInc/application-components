@@ -1,14 +1,13 @@
 FROM node:9.11.1-alpine
 
-WORKDIR /app
+ENV NODE_ENV=production
+
+WORKDIR /src
 COPY package.json ./
 RUN npm install --progress=false --loglevel="error" && npm cache clean --force
 
-COPY src/ ./src/
-COPY test/ ./test/
-COPY protos/ /protos/
+COPY src ./
 
-ENV NODE_ENV=production \
-    PORT=8005
+COPY protos/ /protos
 
-CMD node src/index.js
+CMD node index.js

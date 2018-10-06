@@ -5,7 +5,7 @@ const _ = require('lodash')
 const {inspect} = require('util')
 
 const {join} = require('path')
-const rel = (...paths) => join(__dirname, '../../..', ...paths)
+const rel = (...paths) => join(__dirname, '..', ...paths)
 const PROTO_PATH = rel('protos/payment.proto')
 
 const debug = process.env.DEBUG === 'true'
@@ -19,7 +19,15 @@ const configuration = {}
 
 // add new provider implementations here
 const providers = {
-  TEST: require('./providers/test')
+  TEST: require('./providers/test'),
+  FREEDOMPAY: require('./providers/freedompay'),
+}
+
+// fields that must be provided for a given provider config
+// provider_name, provider_type required by all
+const provider_required_configuration = {
+  TEST: [],
+  FREEDOMPAY: ['location_id', 'terminal_id'],
 }
 
 // calls the implementation for the requested ProviderType
@@ -35,7 +43,7 @@ const callProviderMethod = (provider_type, method_name, params, done) => {
 }
 
 // looks up the configuration for the requested provider_name
-const getProviderType = (provider_name, done) => {
+const getProviderConfig = (provider_name, done) => {
   if (_.isEmpty(configuration)) {
     return done(new Error('You must use Payment.Configure first.'), {})
   }
@@ -44,8 +52,7 @@ const getProviderType = (provider_name, done) => {
   if (!provider) {
     return done(new Error(`Provider ${provider_name} not found in configuration.`))
   }
-  const {provider_type} = provider
-  return provider_type
+  return provider
 }
 
 // grpc implementation: referenced below in main()
@@ -64,20 +71,67 @@ const Implementation = {
     done(null, status)
   },
   Configure: ({request}, done) => {
+
+    // validate configuration
+    if (!Array.isArray(request.providers) ||
+      request.providers.length < 1) {
+      return done(new Error('must supply at least one provider'))
+    }
+    const provider_errors = _(request.providers)
+      .flatMap(check_provider)
+      .compact()
+      .value()
+    if (provider_errors.length > 0)
+      return done(new Error(
+        ['Invalid payment configuration:']
+        .concat(provider_errors)
+        .join('\n')
+      ))
+
+    // everything appears to be good, merge it
     _.merge(configuration, request)
     return done()
   },
   Sale: (params, done) => {
     const {provider_name} = params.request.sale_request
-    const provider_type = getProviderType(provider_name, done)
-    if (!provider_type) return
+    const provider = getProviderConfig(provider_name, done)
+    if (!provider) return
+    params.provider_config = provider
 
-    callProviderMethod(provider_type, 'Sale', params, done)
+    callProviderMethod(provider.provider_type, 'Sale', params, done)
   }
 }
 
+// validation for provider configs
+function check_provider(p, index) {
+  const errors = []
+  const required_field = (f) => {
+    return p[f] ? 0 : errors.push(`provider config #${index+1} missing required field ${f}`)
+  }
+
+  // fields required for all provider configs
+  (['provider_name', 'provider_type']).forEach(required_field)
+  if (errors.length > 0)
+    return errors
+
+  // check provider_type value
+  const valid_provider_types = _.keys(providers)
+  if (!_.includes(valid_provider_types, p.provider_type)) {
+    errors.push(`provider config #${index+1} has invalid provider_type: '${p.provider_type}'`)
+  }
+  if (errors.length > 0)
+    return errors
+
+  // check required fields for the selected provider
+  provider_required_configuration[p.provider_type]
+    .forEach(required_field)
+
+  // add the provider_type to these errors for help in debugging
+  return errors.map(e => p.provider_type + ' ' + e)
+}
+
 function main (opts = {}, done = (err) => {if (err) logger.error(err)}) {
-  const host = `0.0.0.0:${process.env.PORT || opts.port || '8005'}`
+  const host = opts.host || '0.0.0.0:8007'
   const server = new grpc.Server()
 
   // protobufjs automatically converts all fields to camelcase (undocumented feature)
@@ -87,7 +141,7 @@ function main (opts = {}, done = (err) => {if (err) logger.error(err)}) {
   root.load(PROTO_PATH, {keepCase: true}, (err, protoDef) => {
     if (err) return done(err)
     const protoPkg = grpc.loadObject(protoDef)
-    const grpcService = protoPkg.oak.application.Payment.service
+    const grpcService = protoPkg.oak.platform.Payment.service
 
     server.addService(grpcService, Implementation)
     server.bind(host, grpc.ServerCredentials.createInsecure())
