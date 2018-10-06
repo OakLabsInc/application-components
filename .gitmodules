@@ -1,0 +1,3 @@
+[submodule "payment/scripts"]
+	path = payment/scripts
+	url = git@github.com:TorchlightSoftware/docker-cloud-build.git
