@@ -4,7 +4,7 @@ ENV NODE_ENV=production
 
 WORKDIR /src
 COPY package.json ./
-RUN npm install --progress=false --loglevel="error" && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 COPY src ./
 
