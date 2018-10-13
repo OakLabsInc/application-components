@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package oak.platform;
+
+message FreedomPayRequest {
+  string client_environment = 1;
+  string lane_id = 2;
+}
+
+message FreedomPayResponse {
+  string request_guid = 1;
+  string approved_amount = 2; // string containing dollars/cents, decimal separated
+  string dcc_accepted = 3;
+  string decision = 4;
+  string error_code = 5;
+  string msg = 6;  // shortened because 'message' is a reserve word in protobuf
+  string name_on_card = 7;
+  string issuer_name = 8;
+  string expiry_date = 9;
+  string merchant_reference_code = 10;
+  string entry_mode = 11;
+  string receipt_text = 12;
+  string code = 13;
+  string pin_verified = 14;
+  string device_verified = 15;
+  string signature_required = 16;
+}
