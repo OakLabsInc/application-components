@@ -94,7 +94,8 @@ const convert_to_xml = (object) => _.reduce(object,
   (acc, v, k) => v ? acc.concat(`<${k}>${v}</${k}>`) : acc, [])
   .join('')
 
-const sale_xml = (provider_config, {sale_request, freedompay_request}) => {
+const sale_xml = (provider_config, {sale_request, freedompay_request}, RequestType) => {
+  RequestType || (RequestType = 'Sale')
 
   // set defaults and collect the fields that we want to use
   freedompay_request || (freedompay_request = {})
@@ -107,7 +108,7 @@ const sale_xml = (provider_config, {sale_request, freedompay_request}) => {
 
   // create the output XML elements
   const fields = convert_to_xml({
-    RequestType: 'Sale',
+    RequestType,
     RequestGuid: uuid(),
     ClientEnvironment: 'OakOS',
     ChargeAmount: amount,
@@ -124,9 +125,30 @@ const sale_xml = (provider_config, {sale_request, freedompay_request}) => {
   return xml
 }
 
+const auth_xml = (provider_config, request) => {
+  return sale_xml(provider_config, request, 'Auth')
+}
+
+const capture_xml = (provider_config, {sale_request, freedompay_request}) => {
+  throw new Error('capture_xml not implemented')
+}
+
 module.exports = {
   Sale: ({provider_config, request}, done) => {
     const xml = sale_xml(provider_config, request)
     fpay_request(provider_config, xml, done)
+  },
+  Auth: ({provider_config, request}, done) => {
+    const xml = auth_xml(provider_config, request)
+    fpay_request(provider_config, xml, done)
+  },
+  Capture: ({provider_config, request}, done) => {
+    const xml = capture_xml(provider_config, request)
+    fpay_request(provider_config, xml, done)
+    //async.waterfall([
+      //capture_xml,
+      //fpay_request,
+      //capture_response,
+    //], done)
   }
 }
