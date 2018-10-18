@@ -16,8 +16,11 @@ services:
       - ./bin:/src/bin:ro
       - ./conf:/conf:ro
     environment:
+      - CONTROL_PORT=9102
+      - DATA_PORT=9103
+      - GS_URL
       - SYNC_DIR=/persistent/files
-      - GS_URL=${GS_URL-gs://filefiesta/oak-dev-aaron}
-      - INTERVAL=600
+      - SYNC_PERIOD=600
     ports:
-      - "9500:9500"
+      - "9102:9102"
+      - "9103:9103"
