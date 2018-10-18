@@ -36,10 +36,15 @@ can use `curl` to view the files. Here's a quick way to test the whole
 flow:
 
 ```
-echo 'GS_URL=gs://your/gcs/directory/ > .env
+echo 'GS_URL=gs://your/gcs/directory/' > .env
+
+pip install grpcio grpcio-tools
+
+python -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. *.proto
+
+docker-compose up -d
 
 python tryit.py localhost:9102
 
 curl http://localhost:9103/
-
 ```
