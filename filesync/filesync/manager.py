@@ -14,6 +14,7 @@ class Filesync(object):
     def __init__(self, gs_url, workdir, period):
         self.gs_url = gs_url
         self.period = int(period)
+        self.workdir = workdir
         self.outfile = os.path.join(workdir, OUTPUT_FILE_NAME)
         self.setup_cmd = sh.Command('bin/setup.sh').bake(
             _cwd=workdir,
@@ -62,6 +63,8 @@ class Filesync(object):
 
     def begin(self):
         log.info('Starting Filesync management')
+        log.info('Creating working directory %r', self.workdir)
+        os.makedirs(self.workdir)
         self.setup_cmd()
         self.start_process()
 
