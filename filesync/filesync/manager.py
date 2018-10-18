@@ -63,8 +63,9 @@ class Filesync(object):
 
     def begin(self):
         log.info('Starting Filesync management')
-        log.info('Creating working directory %r', self.workdir)
-        os.makedirs(self.workdir)
+        if not os.path.exists(self.workdir):
+            log.info('Creating working directory %r', self.workdir)
+            os.makedirs(self.workdir)
         self.setup_cmd()
         self.start_process()
 
