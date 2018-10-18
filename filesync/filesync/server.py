@@ -78,7 +78,7 @@ class FilesyncServicer(filesync_pb2_grpc.FilesyncServicer):
 
     def Watch(self, request, context):
         for line in self.fs.stream():
-            yield filesync_pb2.Line(line=line)
+            yield filesync_pb2.Line(line=line.rstrip())
 
 
 def state_to_pb(state):

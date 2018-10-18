@@ -28,8 +28,9 @@ empty file called `WAIT` in the top of the SYNC_DIR:
 
 # Dev Notes
 
-Put `gcloud-credentials.json` this directory before you build. It
-should be a service account credentials file. See Google Cloud docs.
+Put `gcloud-credentials.json` in conf/ before you build. It should be
+a service account credentials file. See Google Cloud docs for
+instructions on creating credentials.
 
 The script `tryit.py` can be used to test the control interface. You
 can use `curl` to view the files. Here's a quick way to test the whole
@@ -42,7 +43,7 @@ pip install grpcio grpcio-tools
 
 python -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. *.proto
 
-docker-compose up -d
+docker-compose up --build -d
 
 python tryit.py localhost:9102
 

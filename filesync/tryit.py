@@ -12,6 +12,9 @@ def main():
     stub = filesync_pb2_grpc.FilesyncStub(channel)
     print(stub.Info(EMPTY))
 
+    for line in stub.Watch(EMPTY):
+        print(line.line)
+
 
 if __name__ == '__main__':
     main()
