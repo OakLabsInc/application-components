@@ -8,7 +8,7 @@ services:
 
   app:
     build: .
-    image: oaklabs/filesync:${VERSION-latest}
+    image: index.docker.io/oaklabs/component-filesync:${VERSION-latest}
     volumes:
       - /dev/shm:/dev/shm
       - app-persistent-storage:/persistent

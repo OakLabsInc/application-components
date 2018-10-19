@@ -5,7 +5,7 @@ services:
 
   server:
     build: .
-    image: oaklabs/payment:${VERSION-latest}
+    image: index.docker.io/oaklabs/component-payment:${VERSION-latest}
     environment:
       - PORT=9102
       - DEBUG=true
