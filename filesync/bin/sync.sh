@@ -15,7 +15,7 @@ swap_idle_and_live () {
 echo "=== Verifying credentials"
 
 if ! (gsutil ls "$GS_URL" >/dev/null 2>/dev/null); then
-    echo "Credentials are invalid. Make sure conf/gcloud-credentials.json is present and grants read access to $GS_URL"
+    echo "Credentials are invalid. Make sure /gcloud-credentials.json is present and grants read access to $GS_URL"
     exit 1
 fi
 

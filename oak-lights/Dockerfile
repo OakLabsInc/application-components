@@ -9,10 +9,9 @@ FROM python:3.7.0-alpine
 
 WORKDIR /src/
 
+RUN apk --no-cache add python-dev build-base
 COPY src/requirements.txt ./
-RUN apk --no-cache add --virtual .build-deps python-dev build-base \
-    && pip install -r requirements.txt \
-    && apk del .build-deps
+RUN pip install -r requirements.txt
 
 COPY src/ ./
 

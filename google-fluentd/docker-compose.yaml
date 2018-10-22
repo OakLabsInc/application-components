@@ -7,5 +7,5 @@ services:
     build: .
     image: index.docker.io/oaklabs/component-google-fluentd:${VERSION-latest}
     volumes:
-      - ./google-fluentd.conf:/etc/google-fluentd/google-fluentd.conf
-      - ./gcp-credentials.json:/etc/google/auth/application_default_credentials.json
+      - ./sample-google-fluentd.conf:/fluentd.conf
+      - ./gcp-credentials.json:/application_default_credentials.json
