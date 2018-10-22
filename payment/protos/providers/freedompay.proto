@@ -5,6 +5,7 @@ package oak.platform;
 message FreedomPayRequest {
   string client_environment = 1;
   string lane_id = 2;
+  string request_id = 3;
 }
 
 message FreedomPayResponse {
@@ -24,4 +25,6 @@ message FreedomPayResponse {
   string pin_verified = 14;
   string device_verified = 15;
   string signature_required = 16;
+  string request_id = 17;
+  string transaction_id = 18;
 }

@@ -29,10 +29,11 @@ const format_response = (done) =>
     if (err || !body) return done(err)
     parseString(body, {explicitArray: false}, (err, fpay_response) => {
       if (err) return done(err)
-      const fpay = (field) => _.get(fpay_response, ['POSResponse', field, 0])
       const {POSResponse: {
         Decision,
         RequestGuid,
+        TransactionId,
+        RequestId,
         ApprovedAmount,
         DCCAccepted,
         ErrorCode,
@@ -55,15 +56,18 @@ const format_response = (done) =>
         status: format_status(Decision),
         error: _.includes(['R', 'F', 'E'], Decision) ? Message : '',
         sale_amount: ApprovedAmount,
-        transaction_id: RequestGuid,
+        transaction_id: TransactionId,
         masked_card_number: MaskedCardNumber,
         name_on_card: NameOnCard,
         card_issuer: IssuerName,
+        request_id: RequestId,
       }
 
       // freedompay specific fields
       const freedompay_response = {
         request_guid: RequestGuid,
+        transaction_id: TransactionId,
+        request_id: RequestId,
         approved_amount: ApprovedAmount,
         dcc_accepted: DCCAccepted,
         decision: Decision,
@@ -103,13 +107,14 @@ const sale_xml = (provider_config, {sale_request, freedompay_request}, RequestTy
   const environment_description = provider_config.environment_description || DEFAULT_ENVIRONMENT_DESCRIPTION
   const location_id = sale_request.location_id || provider_config.location_id
   const terminal_id = sale_request.terminal_id || provider_config.terminal_id
-  const {amount, merchant_ref, invoice_number} = sale_request
+  const {amount, merchant_ref, invoice_number, request_id} = sale_request
   const {lane_id} = freedompay_request
 
   // create the output XML elements
   const fields = convert_to_xml({
     RequestType,
     RequestGuid: uuid(),
+    RequestId: request_id,
     ClientEnvironment: 'OakOS',
     ChargeAmount: amount,
     StoreId: location_id,
@@ -129,8 +134,8 @@ const auth_xml = (provider_config, request) => {
   return sale_xml(provider_config, request, 'Auth')
 }
 
-const capture_xml = (provider_config, {sale_request, freedompay_request}) => {
-  throw new Error('capture_xml not implemented')
+const capture_xml = (provider_config, request) => {
+  return sale_xml(provider_config, request, 'Capture')
 }
 
 module.exports = {
