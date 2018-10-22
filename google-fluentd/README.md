@@ -5,7 +5,15 @@ This component uses
 logs to GCP Stackdriver. It can be adapted to send logs to other
 services and to receive logs from application by a variety of methods.
 
-`sample-google-fluentd.conf` shows the recommended configuration.
+Requirements for use:
+
+* Fluentd configuration mounted at `/fluentd.conf`
+* GCP service account credentails mounted at `/application_default_credentials.json`
+
+Those files can be mounted at runtime or `COPY`'d into a custom build
+of this Docker image.
+
+[`sample-google-fluentd.conf`](./sample-google-fluentd.conf) shows the recommended Fluentd configuration.
 
 See the
 [Google Cloud Plugin docs](https://github.com/GoogleCloudPlatform/fluent-plugin-google-cloud)

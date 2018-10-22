@@ -3,34 +3,40 @@
 This service will periodically, atomically sync a Google Cloud Storage
 directory to this container and server the contents over http.
 
-The service is configured through these environment variables:
+Requirements for use:
 
-* `CONTROL_PORT` port that the control gRPC interface listens on
-* `DATA_PORT` port that the files are served on
-* `GS_URL` gs:// url to the Google Cloud Storage directory where the
+* `CONTROL_PORT` env var - port that the control gRPC interface listens on
+* `DATA_PORT` env var - port that the files are served on
+* `GS_URL` env var - gs:// url to the Google Cloud Storage directory where the
   files are downloaded from
-* `SYNC_DIR` absolute path to the directory in the container the files
+* `SYNC_DIR` env var - absolute path to the directory in the container the files
   should be stored it; this should be a persistent volume and will
   need to have at least 2x the amount of space that the GCS directory
   uses
-* `SYNC_PERIOD` how often in seconds syncing should begin; if syncing
+* `SYNC_PERIOD` env var - how often in seconds syncing should begin; if syncing
   is ongoing then the period just restarts
+* GCP service account credentails mounted at `gcloud-credentials.json`
+
+The credentials file can be mounted or added to a custom Docker image
+like so:
+
+```
+FROM index.docker.io/oaklabs/component-filesync:0.0.1
+COPY gcloud-credentials.json /
+```
 
 This service can be signaled to wait before downloading by placing an
 empty file called `WAIT` in the top of the SYNC_DIR:
 
-    # Turn waiting on
-    gsutil cp /dev/null gs://path/to/sync_dir/WAIT
+```
+# Turn waiting on
+gsutil cp /dev/null gs://path/to/sync_dir/WAIT
 
-    # Turn waiting off
-    gsutil rm gs://path/to/sync_dir/WAIT
-
+# Turn waiting off
+gsutil rm gs://path/to/sync_dir/WAIT
+```
 
 # Dev Notes
-
-Put `gcloud-credentials.json` in conf/ before you build. It should be
-a service account credentials file. See Google Cloud docs for
-instructions on creating credentials.
 
 The script `tryit.py` can be used to test the control interface. You
 can use `curl` to view the files. Here's a quick way to test the whole
