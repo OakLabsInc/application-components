@@ -3,16 +3,17 @@ const _ = require('lodash')
 const request = require('request')
 const uuid = require('uuid/v4')
 const {parseString} = require('xml2js')
+const torch = require('torch')
 
 const DEFAULT_ENVIRONMENT_DESCRIPTION = 'FCCTestClient 2.2.16.22'
 
-function fpay_request(provider_config, xml, done) {
+function fpay_request(provider_config, xml, response_field, done) {
   const {host} = provider_config
   request({
     uri: host,
     method: 'POST',
     body: xml,
-  }, format_response(done))
+  }, format_response(response_field, done))
 }
 
 Decision_response_map = {
@@ -24,7 +25,7 @@ Decision_response_map = {
 // default to INTERNAL_ERROR if decision was not recognized
 const format_status = (Decision) => Decision_response_map[Decision] || Decision_response_map['F']
 
-const format_response = (done) =>
+const format_response = (response_field = 'response', done) =>
   (err, {statusCode, headers}, body) => {
     if (err || !body) return done(err)
     parseString(body, {explicitArray: false}, (err, fpay_response) => {
@@ -84,12 +85,13 @@ const format_response = (done) =>
         device_verified: DeviceVerified,
         signature_required: SignatureRequired,
       }
-
-      done(null, {
+      const result = {
         provider_type: 'FREEDOMPAY',
-        response,
         freedompay_response,
-      })
+      }
+      result[response_field] = response
+
+      done(null, result)
     })
   }
 
@@ -98,16 +100,19 @@ const convert_to_xml = (object) => _.reduce(object,
   (acc, v, k) => v ? acc.concat(`<${k}>${v}</${k}>`) : acc, [])
   .join('')
 
-const sale_xml = (provider_config, {sale_request, freedompay_request}, RequestType) => {
-  RequestType || (RequestType = 'Sale')
+const freedompay_xml = (provider_config, request, RequestType, request_prop) => {
 
-  // set defaults and collect the fields that we want to use
-  freedompay_request || (freedompay_request = {})
-  sale_request || (sale_request = {})
+  // set defaults and
+  RequestType || (RequestType = 'Sale')
+  request_prop || (request_prop = 'sale_request')
+  const std_request = request[request_prop] || {}
+  const freedompay_request = request.freedompay_request || {}
+
+  // collect the fields that we want to use
   const environment_description = provider_config.environment_description || DEFAULT_ENVIRONMENT_DESCRIPTION
-  const location_id = sale_request.location_id || provider_config.location_id
-  const terminal_id = sale_request.terminal_id || provider_config.terminal_id
-  const {amount, merchant_ref, invoice_number, request_id} = sale_request
+  const location_id = std_request.location_id || provider_config.location_id
+  const terminal_id = std_request.terminal_id || provider_config.terminal_id
+  const {amount, merchant_ref, invoice_number, request_id} = std_request
   const {lane_id} = freedompay_request
 
   // create the output XML elements
@@ -130,30 +135,37 @@ const sale_xml = (provider_config, {sale_request, freedompay_request}, RequestTy
   return xml
 }
 
+const sale_xml = (provider_config, request) => {
+  return freedompay_xml(provider_config, request, 'Auth')
+}
+
 const auth_xml = (provider_config, request) => {
-  return sale_xml(provider_config, request, 'Auth')
+  return freedompay_xml(provider_config, request, 'Auth')
 }
 
 const capture_xml = (provider_config, request) => {
-  return sale_xml(provider_config, request, 'Capture')
+  return freedompay_xml(provider_config, request, 'Capture')
+}
+
+const cancel_xml = (provider_config, request) => {
+  return freedompay_xml(provider_config, request, 'Cancel', 'standard_request')
 }
 
 module.exports = {
   Sale: ({provider_config, request}, done) => {
     const xml = sale_xml(provider_config, request)
-    fpay_request(provider_config, xml, done)
+    fpay_request(provider_config, xml, 'response', done)
   },
   Auth: ({provider_config, request}, done) => {
     const xml = auth_xml(provider_config, request)
-    fpay_request(provider_config, xml, done)
+    fpay_request(provider_config, xml, 'response', done)
   },
   Capture: ({provider_config, request}, done) => {
     const xml = capture_xml(provider_config, request)
-    fpay_request(provider_config, xml, done)
-    //async.waterfall([
-      //capture_xml,
-      //fpay_request,
-      //capture_response,
-    //], done)
+    fpay_request(provider_config, xml, 'response', done)
+  },
+  Cancel: ({provider_config, request}, done) => {
+    const xml = cancel_xml(provider_config, request)
+    fpay_request(provider_config, xml, 'standard_response', done)
   }
 }

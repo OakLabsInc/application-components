@@ -76,14 +76,14 @@ test('info should return configured', (t) => {
 let last_invoice = 1
 const get_invoice_number = () => 'invoice ' + last_invoice++
 
-test('should successfully process an auth request', (t) => {
+test('should successfully process a sale request', (t) => {
   shared.invoice_number = get_invoice_number()
-  client.Auth({
+  client.Sale({
     sale_request: {
       provider_name: 'freedompay',
       merchant_ref: shared.mref,
       invoice_number: shared.invoice_number,
-      amount: '2.01'
+      amount: '5.01'
     }
   }, (err, response) => {
     t.error(err)
@@ -100,13 +100,14 @@ test('should successfully process an auth request', (t) => {
     t.ok(receipt_text, 'receipt_text')
     t.ok(request_id, 'request_id')
     shared.request_id = request_id
+    torch.yellow({request_id})
 
-    t.deepEqual(response, {
+    const expected = {
       provider_type: 'FREEDOMPAY',
       response: {
         status: 'ACCEPTED',
         error: '',
-        sale_amount: '2.01',
+        sale_amount: '5.01',
         currency: 'USD',
         masked_card_number: '414720XXXXXX8479',
         name_on_card: 'MASON/BRANDON ',
@@ -116,7 +117,7 @@ test('should successfully process an auth request', (t) => {
       },
       freedompay_response: {
         request_guid,
-        approved_amount: '2.01',
+        approved_amount: '5.01',
         dcc_accepted: 'false',
         decision: 'A',
         error_code: '3021',
@@ -134,75 +135,20 @@ test('should successfully process an auth request', (t) => {
         request_id,
         transaction_id,
       }
-    })
-    t.end()
-  })
-})
-
-test('should successfully process a capture request', (t) => {
-  client.Capture({
-    sale_request: {
-      provider_name: 'freedompay',
-      merchant_ref: shared.mref,
-      request_id: shared.request_id,
-      invoice_number: shared.invoice_number,
-      amount: '2.01'
     }
-  }, (err, response) => {
-    t.error(err)
-
-    //// test dynamic fields
-    const {transaction_id, name_on_card, card_issuer, request_id} = response.response
-    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
-    t.ok(transaction_id, 'transaction_id')
-    t.ok(request_id, 'request_id')
-
-    t.deepEqual(response, {
-      provider_type: 'FREEDOMPAY',
-      response: {
-        status: 'ACCEPTED',
-        error: '',
-        sale_amount: '2.01',
-        currency: 'USD',
-        masked_card_number: '',
-        name_on_card: '',
-        transaction_id,
-        card_issuer: '',
-        request_id,
-      },
-      freedompay_response: {
-        request_guid,
-        approved_amount: '2.01',
-        dcc_accepted: 'false',
-        decision: 'A',
-        error_code: '3021',
-        msg: 'ACCEPTED',
-        name_on_card: '',
-        issuer_name: '',
-        expiry_date: '',
-        merchant_reference_code: shared.mref,
-        entry_mode: '',
-        receipt_text: '',
-        code: '',
-        pin_verified: '',
-        device_verified: '',
-        signature_required: '',
-        request_id,
-        transaction_id,
-      }
-    })
+    t.deepEqual(response, expected)
     t.end()
   })
 })
 
-test('user should cancel an auth request', (t) => {
+test('user should cancel a sale request', (t) => {
   shared.invoice_number = get_invoice_number()
-  client.Auth({
+  client.Sale({
     sale_request: {
       provider_name: 'freedompay',
       merchant_ref: shared.mref,
       invoice_number: shared.invoice_number,
-      amount: '2.11'
+      amount: '5.13'
     }
   }, (err, response) => {
     t.error(err)
@@ -214,7 +160,7 @@ test('user should cancel an auth request', (t) => {
     t.ok(receipt_text, 'receipt_text')
     t.ok(request_id, 'request_id')
     shared.request_id = request_id
-    torch.blue({request_id})
+    torch.yellow({request_id})
 
     t.deepEqual(response, {
       provider_type: 'FREEDOMPAY',

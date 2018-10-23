@@ -117,6 +117,14 @@ const Implementation = {
     params.provider_config = provider
 
     callProviderMethod(provider.provider_type, 'Capture', params, done)
+  },
+  Cancel: (params, done) => {
+    const {provider_name} = params.request.standard_request
+    const provider = getProviderConfig(provider_name, done)
+    if (!provider) return done(new Error(`Invalid provider ${provider_name}`))
+    params.provider_config = provider
+
+    callProviderMethod(provider.provider_type, 'Cancel', params, done)
   }
 }
 

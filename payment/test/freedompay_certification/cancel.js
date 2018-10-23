@@ -10,9 +10,7 @@ const {PROTO_PATH} = paymentService
 const host = '0.0.0.0:8008'
 const FREEDOMPAY_HOST = 'http://10.0.1.34:1011'
 
-const shared = {
-  mref: 'Bob\'s Burgers',
-}
+const shared = {}
 
 test('should start the service', (t) => {
   paymentService({host}, t.end)
@@ -77,6 +75,7 @@ let last_invoice = 1
 const get_invoice_number = () => 'invoice ' + last_invoice++
 
 test('should successfully process an auth request', (t) => {
+  shared.mref = uuid()
   shared.invoice_number = get_invoice_number()
   client.Auth({
     sale_request: {
@@ -89,8 +88,9 @@ test('should successfully process an auth request', (t) => {
     t.error(err)
 
     //// test dynamic fields
-    const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
+    const {error, transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
     const {expiry_date, receipt_text, request_guid} = response.freedompay_response
+    t.notOk(error, 'should not have an error')
     t.ok(transaction_id, 'transaction_id')
     t.ok(masked_card_number, 'masked_card_number exists')
     t.equal(masked_card_number.length, 16, 'masked_card_number length')
@@ -139,115 +139,32 @@ test('should successfully process an auth request', (t) => {
   })
 })
 
-test('should successfully process a capture request', (t) => {
-  client.Capture({
-    sale_request: {
+test('system should cancel an auth request', (t) => {
+  client.Cancel({
+    standard_request: {
       provider_name: 'freedompay',
       merchant_ref: shared.mref,
-      request_id: shared.request_id,
-      invoice_number: shared.invoice_number,
-      amount: '2.01'
     }
   }, (err, response) => {
     t.error(err)
 
     //// test dynamic fields
-    const {transaction_id, name_on_card, card_issuer, request_id} = response.response
-    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
-    t.ok(transaction_id, 'transaction_id')
-    t.ok(request_id, 'request_id')
+    const {status, error} = response.standard_response
+    const {request_guid} = response.freedompay_response
 
     t.deepEqual(response, {
       provider_type: 'FREEDOMPAY',
-      response: {
+      standard_response: {
         status: 'ACCEPTED',
         error: '',
-        sale_amount: '2.01',
-        currency: 'USD',
-        masked_card_number: '',
-        name_on_card: '',
-        transaction_id,
-        card_issuer: '',
-        request_id,
-      },
-      freedompay_response: {
-        request_guid,
-        approved_amount: '2.01',
-        dcc_accepted: 'false',
-        decision: 'A',
-        error_code: '3021',
-        msg: 'ACCEPTED',
-        name_on_card: '',
-        issuer_name: '',
-        expiry_date: '',
-        merchant_reference_code: shared.mref,
-        entry_mode: '',
-        receipt_text: '',
-        code: '',
-        pin_verified: '',
-        device_verified: '',
-        signature_required: '',
-        request_id,
-        transaction_id,
-      }
-    })
-    t.end()
-  })
-})
-
-test('user should cancel an auth request', (t) => {
-  shared.invoice_number = get_invoice_number()
-  client.Auth({
-    sale_request: {
-      provider_name: 'freedompay',
-      merchant_ref: shared.mref,
-      invoice_number: shared.invoice_number,
-      amount: '2.11'
-    }
-  }, (err, response) => {
-    t.error(err)
-
-    //// test dynamic fields
-    const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
-    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
-    t.ok(transaction_id, 'transaction_id')
-    t.ok(receipt_text, 'receipt_text')
-    t.ok(request_id, 'request_id')
-    shared.request_id = request_id
-    torch.blue({request_id})
-
-    t.deepEqual(response, {
-      provider_type: 'FREEDOMPAY',
-      response: {
-        status: 'REJECTED',
-        error: 'UserCancel',
-        sale_amount: '0',
-        currency: 'USD',
-        masked_card_number: '',
-        name_on_card: '',
-        transaction_id,
-        card_issuer: '',
-        request_id,
       },
       freedompay_response: {
         request_guid,
         approved_amount: '0',
         dcc_accepted: 'false',
-        decision: 'R',
-        error_code: '3133',
-        msg: 'UserCancel',
-        name_on_card: '',
-        issuer_name: '',
-        expiry_date: '',
-        merchant_reference_code: shared.mref,
-        entry_mode: '',
-        receipt_text,
-        code: '',
-        pin_verified: 'false',
-        device_verified: 'false',
-        signature_required: 'true',
-        request_id,
-        transaction_id,
+        decision: 'A',
+        error_code: '100',
+        msg: 'ACCEPT',
       }
     })
     t.end()

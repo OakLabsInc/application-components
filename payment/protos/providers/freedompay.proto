@@ -28,3 +28,15 @@ message FreedomPayResponse {
   string request_id = 17;
   string transaction_id = 18;
 }
+
+message FreedomPayCancelRequest {
+}
+
+message FreedomPayCancelResponse {
+  string request_guid = 1;
+  string approved_amount = 2;
+  string dcc_accepted = 3;
+  string decision = 4;
+  string error_code = 5;
+  string msg = 6;
+}
