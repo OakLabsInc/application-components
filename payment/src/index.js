@@ -21,6 +21,7 @@ const configuration = {}
 const providers = {
   TEST: require('./providers/test'),
   FREEDOMPAY: require('./providers/freedompay'),
+  WORLDPAY: require('./providers/worldpay'),
 }
 
 // fields that must be provided for a given provider config
@@ -28,6 +29,7 @@ const providers = {
 const provider_required_configuration = {
   TEST: [],
   FREEDOMPAY: ['location_id', 'terminal_id'],
+  WORLDPAY: []
 }
 
 // calls the implementation for the requested ProviderType

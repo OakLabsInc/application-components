@@ -2,6 +2,7 @@ syntax = "proto3";
 
 import "google/protobuf/empty.proto";
 import "providers/freedompay.proto";
+import "providers/worldpay.proto";
 
 package oak.platform;
 
@@ -23,6 +24,7 @@ message PaymentConfiguration {
 enum PaymentProviderType {
   TEST = 0;
   FREEDOMPAY = 1;
+  WORLDPAY = 2;
 }
 
 enum PaymentSolutionType {
@@ -54,6 +56,7 @@ message PaymentProvider {
 message SaleRequest {
   StandardSaleRequest sale_request = 1;
   FreedomPayRequest freedompay_request = 2;
+  WorldPayRequest worldpay_request = 3;
 }
 
 enum Currency {
@@ -75,6 +78,7 @@ message SaleResponse {
   PaymentProviderType provider_type = 1;
   StandardSaleResponse response = 2;
   FreedomPayResponse freedompay_response = 3;
+  WorldPayResponse worldpay_response = 4;
 }
 
 message StandardSaleResponse {

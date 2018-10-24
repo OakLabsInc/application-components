@@ -1,0 +1,79 @@
+syntax = "proto3";
+
+package oak.platform;
+
+message WorldPayRequest {
+  int32 laneId = 1;
+  float transactionAmount = 2;
+  string referenceNumber = 3;
+  string ticketNumber = 4;
+  WorldPayRequestConfiguration configuration = 5;
+}
+
+message WorldPayRequestConfiguration {  
+  bool checkForDuplicateTransactions = 1;
+  bool allowPartialApprovals = 2;
+  string marketCode = 3;
+}
+
+message WorldPayResponse {
+  repeated WorldPayResponseErrors _errors = 1;
+  bool _hasErrors = 2;
+  string accountNumber = 3;
+  string approvalNumber = 4;
+  float approvalAmount = 5;
+  string cardHolderName = 6;
+  string cardLogo = 7;
+  string entryMode = 8;
+  string expirationMonth = 9;
+  string expirationYear = 10;
+  bool isApproved = 11;
+  string isOffline = 12;
+  string networkLabel = 13;
+  string paymentType = 14;
+  string statusCode = 15;
+  float totalAmount = 16;
+  string terminalId = 17;
+  string transactionDateTime = 18;
+  string transactionId = 19;
+  WorldPayResponseEMV emv = 20;
+  bool pinVerified = 21;
+  WorldPayResponseProcessor _processor = 22;
+}
+
+message WorldPayResponseProcessor {
+  string expressResponseCode = 1;
+  string expressResponseMessage = 2;
+  string hostResponseCode = 3;
+  string hostResponseMessage = 4;
+  string processorReferenceNumber = 5;
+  string processorRequestFailed = 6;
+  string processorRequestWasApproved = 7;
+  string processorResponseCode = 8;
+  string processorResponseMessage = 9;
+}
+
+message WorldPayResponseErrors {
+    string developerMessage = 1;
+    string errorType = 2;
+    string exceptionMessage = 3;
+    string exceptionTypeFullName = 4;
+    string exceptionTypeShortName = 5;
+    string userMessage = 6;
+}
+
+message WorldPayResponseEMV {
+    string applicationIdentifier = 1;
+    string applicationLabel = 2;
+    string applicationPreferredName = 3;
+    string applicationTransactionCounter = 4;
+    string cryptogram = 5;
+    string issuerCodeTableIndex = 6;
+    bool pinBypassed = 7;
+    repeated WorldPayResponseEMVTag tags = 8;
+}
+
+message WorldPayResponseEMVTag {
+  string key = 1;
+  string value = 2;
+}
