@@ -18,6 +18,10 @@ const service = paymentService({host}, () => {
           provider_name: 'worldpay',
           provider_type: 'WORLDPAY',
           host: WORLDPAY_HOST,
+          lane_id: 2,
+          api_id: 'bbdcd0b1-61ea-4d89-a16c-c843833bed39',
+          api_key: 'a7a33930-6d7e-4d1a-88b6-8971f0db3edf',
+          application_id: 9573
         }]
       }, () => {
         client.Info({}, (err, status) => {
@@ -198,15 +202,13 @@ const service = paymentService({host}, () => {
             client.Sale({
                 sale_request: {
                     provider_name: 'worldpay',
-                    amount: 1
+                    amount: 23.05
                 },
                 worldpay_request: { 
-                    laneId: 2,
                     ticketNumber: get_invoice_number().toString().padStart(10, '0'),
                     referenceNumber: uuid(),
                     configuration: {
-                        allowPartialApprovals: false,
-                        checkForDuplicateTransactions: true,
+                        allowPartialApprovals: true,
                     }
                 }
             }, (err, response) => {

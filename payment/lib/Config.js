@@ -1,10 +1,12 @@
 'use strict';
 
 module.exports = class Config {
-  constructor(configPath, address, authVersion) {
-    this.pathToConfig = configPath;
+  constructor(address, authCredential, authSecret, appId) {
     this.serviceAddress = address;
-    this.tpAuthorizationVersion = authVersion;
+    this.tpAuthorizationCredential = authCredential; // developer key
+    this.tpAuthorizationSecret = authSecret; // developer secret
+    this.tpApplicationId = appId;
+    this.tpAuthorizationVersion = "1.0";
     this.useJSON = true;
   }
 }

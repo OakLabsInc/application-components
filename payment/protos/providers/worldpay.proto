@@ -21,7 +21,7 @@ message WorldPayResponse {
   bool _hasErrors = 2;
   string accountNumber = 3;
   string approvalNumber = 4;
-  float approvalAmount = 5;
+  float approvedAmount = 5;
   string cardHolderName = 6;
   string cardLogo = 7;
   string entryMode = 8;

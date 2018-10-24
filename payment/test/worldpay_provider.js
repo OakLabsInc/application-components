@@ -37,7 +37,7 @@ test('info should return not configured', (t) => {
 })
 
 
-test('should configure the worldpay service', (t) => {
+test('should not configure the service without required worldpay fields', (t) => {
   client.Configure({
     providers: [{
       provider_name: 'worldpay',
@@ -45,26 +45,72 @@ test('should configure the worldpay service', (t) => {
       host: WORLDPAY_HOST,
     }]
   }, (err) => {
-    t.error(err)
+    t.ok(err)
+    t.equal(err.message, `2 UNKNOWN: Invalid payment configuration:
+WORLDPAY provider config #1 missing required field api_id
+WORLDPAY provider config #1 missing required field api_key
+WORLDPAY provider config #1 missing required field application_id
+WORLDPAY provider config #1 missing required field lane_id`)
     t.end()
   })
 })
 
-/* will refactor required fields after certification
+test('should throw an error with an invalid lane id passed', (t) => {
+  t.throws(() => {
+    client.Configure({
+      providers: [{
+        provider_name: 'worldpay',
+        provider_type: 'WORLDPAY',
+        host: WORLDPAY_HOST,
+        lane_id: '2',
+      }]
+    }, (err) => {
+      t.ok(err)
+      t.end()
+    })
+  })
+
+  t.end()
+})
+
+test('should throw an error with an invalid application id passed', (t) => {
+  t.throws(() => {
+    client.Configure({
+      providers: [{
+        provider_name: 'worldpay',
+        provider_type: 'WORLDPAY',
+        host: WORLDPAY_HOST,
+        application_id: '9573',
+      }]
+    }, (err) => {
+      t.ok(err)
+      t.end()
+    })
+  })
+
+  t.end()
+})
+
+
+let id = uuid();
+let key = uuid();
+
 test('should configure the service with all required fields', (t) => {
   client.Configure({
     providers: [{
       provider_name: 'worldpay',
       provider_type: 'WORLDPAY',
-      host: WORLDPAY_HOST,
-      terminal_id: '2',
+      host: WORLDPAY_HOST,      
+      api_id: id,
+      api_key: key,
+      application_id: 9573,
+      lane_id: 2,
     }]
   }, (err) => {
     t.error(err)
     t.end()
   })
 })
-*/
 
 test('info should return configured', (t) => {
   client.Info({}, (err, info) => {
@@ -78,13 +124,15 @@ test('info should return configured', (t) => {
             provider_type: 'WORLDPAY',
             solution: 'DEFAULT',
             host: WORLDPAY_HOST,
-            api_id: '',
-            api_key: '',
+            api_id: id,
+            api_key: key,
             batch_interval: 'OFF',            
             batch_hour: 0,
             location_id: '',
             terminal_id: '',
-            environment_description: ''
+            environment_description: '',
+            application_id: 9573,
+            lane_id: 2
           }
         ]
       }
@@ -93,8 +141,7 @@ test('info should return configured', (t) => {
   })
 })
 
-
-test('should fail to process a sale without a laneId', (t) => {
+test('should fail with an internal error when an invalid developer key is supplied', (t) => {
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
@@ -103,37 +150,76 @@ test('should fail to process a sale without a laneId', (t) => {
   }, (err, response) => {
     t.error(err)
     t.ok(response.worldpay_response._hasErrors)
-    t.notOk(response.worldpay_response.isApproved)
+    t.equal(response.response.status, 'INTERNAL_ERROR')
+    t.equal(response.response.error, 'Invalid developer account')
     t.end()
   })
 })
 
-test('should fail to process a sale without a valide laneId', (t) => {
-  client.Sale({
-    sale_request: {
+test('should fail with an internal error when an invalid developer secret is supplied', (t) => {
+  id = 'bbdcd0b1-61ea-4d89-a16c-c843833bed39'; // set correct developer key from tripos.config service
+
+  client.Configure({
+    providers: [{
       provider_name: 'worldpay',
-      amount: 10.50
-    }, worldpay_request: { 
-      laneId: 100,
-      ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: uuid(),
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
+      provider_type: 'WORLDPAY',
+      host: WORLDPAY_HOST,
+      lane_id: 2,
+      api_id: id,
+      api_key: key,
+      application_id: 9573
+    }]
+  }, () => {
+    client.Sale({
+      sale_request: {
+        provider_name: 'worldpay',
+        amount: 10.50
       }
-    }
-  }, (err, response) => {
-    t.error(err)
-    t.ok(response.worldpay_response._hasErrors)
-    t.equal(response.response.error, 'Could not find a PIN pad tethered to the lane specified in the request: 100')
-    t.notOk(response.worldpay_response.isApproved)
-    t.end()
+    }, (err, response) => {
+      t.error(err)
+      t.ok(response.worldpay_response._hasErrors)
+      t.equal(response.response.status, 'INTERNAL_ERROR')
+      t.notEqual(response.response.error, 'Invalid developer account')
+      t.end()
+    })
   })
 })
-
 
 let ticketNumber = 1
 const get_invoice_number = () => ticketNumber++
+
+test('should successfully process a sale', (t) => {
+  key = 'a7a33930-6d7e-4d1a-88b6-8971f0db3edf' // set correct developer secret from tripos.config service
+  
+  client.Configure({
+    providers: [{
+      provider_name: 'worldpay',
+      provider_type: 'WORLDPAY',
+      host: WORLDPAY_HOST,
+      lane_id: 2,
+      api_id: id,
+      api_key: key,
+      application_id: 9573
+    }]
+  }, () => {
+    let mref = uuid()
+    const invoice_number = get_invoice_number()
+    client.Sale({
+      sale_request: {
+        provider_name: 'worldpay',
+        amount: 1
+      }, worldpay_request: { 
+        ticketNumber: ticketNumber.toString().padStart(10, '0'),
+        referenceNumber: mref
+      }
+    }, (err, response) => {
+      t.error(err)
+      t.ok(response.worldpay_response.isApproved);    
+      t.end()
+    })
+  })
+})
+
 
 test('should not accept a invalid sale amount value', (t) => {
   t.throws(() => {
@@ -144,13 +230,8 @@ test('should not accept a invalid sale amount value', (t) => {
         provider_name: 'worldpay',
         amount: 'abc'
       }, worldpay_request: { 
-        laneId: 2,
         ticketNumber: ticketNumber.toString().padStart(10, '0'),
-        referenceNumber: mref,
-        configuration: {
-            allowPartialApprovals: false,
-            checkForDuplicateTransactions: false,
-        }
+        referenceNumber: mref
       }
     }, (err, response) => {
       t.error(err)
@@ -170,13 +251,8 @@ test('should not approve on a cancel. (Cancelled pressed on terminal)', (t) => {
       provider_name: 'worldpay',
       amount: 20
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
+      referenceNumber: mref
     }
   }, (err, response) => {
     t.error(err)
@@ -195,13 +271,8 @@ test('should not approve on a cancel. (Cancelled pressed on when confirming amou
       provider_name: 'worldpay',
       amount: 20
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
+      referenceNumber: mref
     }
   }, (err, response) => {
     t.error(err)
@@ -212,6 +283,29 @@ test('should not approve on a cancel. (Cancelled pressed on when confirming amou
   })  
 })
 
+
+test('should not approve when a chip is removed while processing. (remove chip after confirming amount)', (t) => {  
+  let mref = uuid()
+  const invoice_number = get_invoice_number()
+  client.Sale({
+    sale_request: {
+      provider_name: 'worldpay',
+      amount: 20
+    }, worldpay_request: { 
+      ticketNumber: ticketNumber.toString().padStart(10, '0'),
+      referenceNumber: mref
+    }
+  }, (err, response) => {
+    t.error(err)
+    t.notOk(response.worldpay_response.isApproved)
+    t.equal(response.response.status, `REJECTED`)
+    t.equal(response.worldpay_response.statusCode, `Cancelled`)
+    t.end()
+  })  
+})
+
+
+
 test('should decline a transaction.', (t) => {  
   let mref = uuid()
   const invoice_number = get_invoice_number()
@@ -220,13 +314,8 @@ test('should decline a transaction.', (t) => {
       provider_name: 'worldpay',
       amount: .20
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
+      referenceNumber: mref
     }
   }, (err, response) => {
     t.error(err)
@@ -245,13 +334,8 @@ test('should decline on a partial approval.', (t) => {
       provider_name: 'worldpay',
       amount: 23.05
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
+      referenceNumber: mref
     }
   }, (err, response) => {
     t.error(err)
@@ -270,12 +354,10 @@ test('should approve on a partial approval when allowPartialApprovals set to tru
       provider_name: 'worldpay',
       amount: 23.05
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref,
       configuration: {
           allowPartialApprovals: true,
-          checkForDuplicateTransactions: false,
       }
     }
   }, (err, response) => {
@@ -286,6 +368,7 @@ test('should approve on a partial approval when allowPartialApprovals set to tru
   })  
 })
 
+
 test('should decline on an expired credit card.', (t) => {  
   let mref = uuid()
   const invoice_number = get_invoice_number()
@@ -294,13 +377,8 @@ test('should decline on an expired credit card.', (t) => {
       provider_name: 'worldpay',
       amount: .21
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
+      referenceNumber: mref
     }
   }, (err, response) => {
     t.error(err)
@@ -319,11 +397,9 @@ test('should decline on an duplicate transaction with flag set to check for dupl
       provider_name: 'worldpay',
       amount: .22
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref,
       configuration: {
-          allowPartialApprovals: false,
           checkForDuplicateTransactions: true,
       }
     }
@@ -344,13 +420,8 @@ test('should approve on a duplicate transaction when checkForDuplicateTransactio
       provider_name: 'worldpay',
       amount: .22
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
     }
   }, (err, response) => {
     t.error(err)
@@ -358,31 +429,6 @@ test('should approve on a duplicate transaction when checkForDuplicateTransactio
     t.equal(response.response.status, `ACCEPTED`)
     t.end()
   })  
-})
-
-
-test('should successfully process a sale', (t) => {
-  let mref = uuid()
-  const invoice_number = get_invoice_number()
-  client.Sale({
-    sale_request: {
-      provider_name: 'worldpay',
-      amount: 1
-    }, worldpay_request: { 
-      laneId: 2,
-      ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
-    }
-  }, (err, response) => {
-    t.error(err)
-
-    t.ok(response.worldpay_response.isApproved);    
-    t.end()
-  })
 })
 
 test('should not approve on a timeout. (Let the machine timeout by not swiping card)', (t) => {  
@@ -393,13 +439,8 @@ test('should not approve on a timeout. (Let the machine timeout by not swiping c
       provider_name: 'worldpay',
       amount: 20
     }, worldpay_request: { 
-      laneId: 2,
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
-      referenceNumber: mref,
-      configuration: {
-          allowPartialApprovals: false,
-          checkForDuplicateTransactions: false,
-      }
+      referenceNumber: mref
     }
   }, (err, response) => {
     t.error(err)

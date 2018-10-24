@@ -38,13 +38,15 @@ message PaymentProvider {
   PaymentProviderType provider_type = 2; // required
   PaymentSolutionType solution = 3; // optional
   string host = 4; // required for most solutions... location of payment service on LAN or WWW
-  string api_id = 5; // optional... credentials for authenticated provider
-  string api_key = 6; // optional... credentials for authenticated provider
+  string api_id = 5; // optional... credentials for authenticated provider, WorldPay's Developer Key
+  string api_key = 6; // optional... credentials for authenticated provider, WOrldPay's Developer Secret
   BatchInterval batch_interval = 7;
   int32 batch_hour = 8; // 0-23
   string location_id = 9; // required for FreedomPay
   string terminal_id = 10; // required for FreedomPay
   string environment_description = 11; // optional
+  int32 application_id = 12; // required for WorldPay
+  int32 lane_id = 13; // required for WorldPay
 
   enum BatchInterval {
     OFF = 0;
@@ -69,7 +71,7 @@ message StandardSaleRequest {
   Currency currency = 3;
   string transaction_id = 4;
   string location_id = 5;
-  int32 terminal_id = 6;
+  int32 terminal_id = 6; 
   string merchant_ref = 7; //required for FreedomPay
   string invoice_number = 8;
 }

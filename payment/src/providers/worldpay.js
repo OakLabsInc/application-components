@@ -3,16 +3,8 @@ const _ = require('lodash')
 const request = require('request')
 const uuid = require('uuid/v4')
 const {parseString} = require('xml2js')
-var Config = require('../../lib/Config.js');
-var Address = require('../../lib/Address.js');
-var SaleRequest = require('../../lib/SaleRequest');
-var triPos = require('../../lib/tripos');
-const {join} = require('path')
-
-const rel = (...paths) => join(__dirname, '../../', ...paths)
-const CONFIG_PATH = rel('docs/triPOS.config')
-
-const DEFAULT_ENVIRONMENT_DESCRIPTION = 'WorldPay 5.15'
+const Config = require('../../lib/Config.js');
+const triPos = require('../../lib/tripos');
 
 Decision_response_map = {
   'Approved': 'ACCEPTED',
@@ -32,7 +24,7 @@ Decision_response_map = {
   'CardNotSupported': 'INPUT_ERROR',
   'BadCard': 'INPUT_ERROR'
 
-  /* The rest of these will default to Failed.
+  /* The rest of these will default to INTERNAL_ERROR.
   CardError
   ChipError
   PinPadError
@@ -74,7 +66,7 @@ const format_response = (done) =>
       _hasErrors,
       accountNumber,
       approvalNumber,
-      approvalAmount,
+      approvedAmount,
       cardHolderName,
       cardLogo,
       entryMode,
@@ -101,30 +93,45 @@ const format_response = (done) =>
     })
   }
 
-  const map_collection = (objects, literal) => {
-    return _.map(objects, literal).join("\n");
-  }
+const map_collection = (objects, literal) => {
+  return _.map(objects, literal).join("\n");
+}
+
+const sale_request = (provider_config, {sale_request, worldpay_request}) => {  
+  const fields = {
+    laneId: provider_config.lane_id,
+    transactionAmount: sale_request.amount,
+    referenceNumber: worldpay_request !== null ? worldpay_request.referenceNumber || '' : '',
+    ticketNumber: worldpay_request !== null ? worldpay_request.ticketNumber || '' : '',
+    configuration: worldpay_request !== null ? configuration_request(worldpay_request) : null
+  };
+
+  return fields;
+};
+
+const configuration_request = ({configuration}) => {
+  const fields = {
+    checkForDuplicateTransactions: configuration !== null ? configuration.checkForDuplicateTransactions || false : false,
+    allowPartialApprovals: configuration !==  null ? configuration.allowPartialApprovals || false : false,
+    marketCode: configuration !== null ? configuration.marketCode || 'QSR' : 'QSR'
+  };
+
+  return fields;
+}
 
 module.exports = {
   Sale: ({provider_config, request}, done) => {    
-    var config = new Config(
-      CONFIG_PATH,
+    const config = new Config(
       `${provider_config.host}/api/v1/sale`, 
-      "1.0"
+      provider_config.api_id,
+      provider_config.api_key,
+      provider_config.application_id
     );
 
-    let jsonRequest = {
-      ...request.worldpay_request,
-      transactionAmount: request.sale_request.amount,
-    };
+    const json = sale_request(provider_config, request);
     
-    triPos.getAuthFromConfig(config.pathToConfig, function(err, credential) {
-      if(err) { return done(err); }
-  
-      config.tpAuthorizationCredential = credential.developerKey;
-      config.tpAuthorizationSecret = credential.developerSecret;
-      
-      triPos.makeSaleRequest(config, jsonRequest, format_response(done));
-    });    
+    console.log(json);
+    
+    triPos.makeSaleRequest(config, json, format_response(done));
   }
 }

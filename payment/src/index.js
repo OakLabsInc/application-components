@@ -29,7 +29,7 @@ const providers = {
 const provider_required_configuration = {
   TEST: [],
   FREEDOMPAY: ['location_id', 'terminal_id'],
-  WORLDPAY: []
+  WORLDPAY: ['api_id', 'api_key', 'application_id', 'lane_id']
 }
 
 // calls the implementation for the requested ProviderType
