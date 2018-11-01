@@ -5,14 +5,13 @@ const {inspect} = require('util')
 const torch = require('torch')
 const uuid = require('uuid/v4')
 
+const {location_id, terminal_id} = require('./const')
 const paymentService = require('../..')
 const {PROTO_PATH} = paymentService
 const host = '0.0.0.0:8008'
 const FREEDOMPAY_HOST = 'http://10.0.1.34:1011'
 
-const shared = {
-  mref: 'Bob\'s Burgers',
-}
+const shared = {}
 
 test('should start the service', (t) => {
   paymentService({host}, t.end)
@@ -37,8 +36,8 @@ test('should configure the service with all required fields', (t) => {
       provider_name: 'freedompay',
       provider_type: 'FREEDOMPAY',
       host: FREEDOMPAY_HOST,
-      location_id: 'The Alamo',
-      terminal_id: 'Register 1',
+      location_id,
+      terminal_id,
     }]
   }, (err) => {
     t.error(err)
@@ -62,8 +61,8 @@ test('info should return configured', (t) => {
             api_key: '',
             batch_interval: 'OFF',
             batch_hour: 0,
-            location_id: 'The Alamo',
-            terminal_id: 'Register 1',
+            location_id,
+            terminal_id,
             environment_description: ''
           }
         ]
@@ -76,16 +75,9 @@ test('info should return configured', (t) => {
 let last_invoice = 1
 const get_invoice_number = () => 'invoice ' + last_invoice++
 
-test('should successfully process a sale request', (t) => {
-  shared.invoice_number = get_invoice_number()
-  client.Sale({
-    sale_request: {
-      provider_name: 'freedompay',
-      merchant_ref: shared.mref,
-      invoice_number: shared.invoice_number,
-      amount: '5.01'
-    }
-  }, (err, response) => {
+expectSuccess = (t, fields = {}) => {
+  const {amount} = fields
+  return (err, response) => {
     t.error(err)
 
     //// test dynamic fields
@@ -107,7 +99,7 @@ test('should successfully process a sale request', (t) => {
       response: {
         status: 'ACCEPTED',
         error: '',
-        sale_amount: '5.01',
+        sale_amount: amount,
         currency: 'USD',
         masked_card_number: '414720XXXXXX8479',
         name_on_card: 'MASON/BRANDON ',
@@ -117,7 +109,7 @@ test('should successfully process a sale request', (t) => {
       },
       freedompay_response: {
         request_guid,
-        approved_amount: '5.01',
+        approved_amount: amount,
         dcc_accepted: 'false',
         decision: 'A',
         error_code: '3021',
@@ -125,7 +117,7 @@ test('should successfully process a sale request', (t) => {
         name_on_card,
         issuer_name: card_issuer,
         expiry_date,
-        merchant_reference_code: shared.mref,
+        merchant_reference_code: shared.invoice_number,
         entry_mode: 'swiped',
         receipt_text,
         code: '',
@@ -138,7 +130,19 @@ test('should successfully process a sale request', (t) => {
     }
     t.deepEqual(response, expected)
     t.end()
-  })
+  }
+}
+
+test('should successfully process a sale request', (t) => {
+  shared.invoice_number = get_invoice_number()
+  client.Sale({
+    sale_request: {
+      provider_name: 'freedompay',
+      merchant_ref: shared.invoice_number,
+      invoice_number: shared.invoice_number,
+      amount: '5.01'
+    }
+  }, expectSuccess(t, {amount: '5.01'}))
 })
 
 test('user should cancel a sale request', (t) => {
@@ -146,7 +150,7 @@ test('user should cancel a sale request', (t) => {
   client.Sale({
     sale_request: {
       provider_name: 'freedompay',
-      merchant_ref: shared.mref,
+      merchant_ref: shared.invoice_number,
       invoice_number: shared.invoice_number,
       amount: '5.13'
     }
@@ -185,7 +189,7 @@ test('user should cancel a sale request', (t) => {
         name_on_card: '',
         issuer_name: '',
         expiry_date: '',
-        merchant_reference_code: shared.mref,
+        merchant_reference_code: shared.invoice_number,
         entry_mode: '',
         receipt_text,
         code: '',
@@ -198,6 +202,17 @@ test('user should cancel a sale request', (t) => {
     })
     t.end()
   })
+})
+
+test('system should retry a sale request', (t) => {
+  client.Sale({
+    sale_request: {
+      provider_name: 'freedompay',
+      merchant_ref: shared.invoice_number,
+      invoice_number: shared.invoice_number,
+      amount: '5.13'
+    }
+  }, expectSuccess(t, {amount: '5.13'}))
 })
 
 

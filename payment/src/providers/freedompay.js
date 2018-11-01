@@ -3,9 +3,9 @@ const _ = require('lodash')
 const request = require('request')
 const uuid = require('uuid/v4')
 const {parseString} = require('xml2js')
-const torch = require('torch')
 
-const DEFAULT_ENVIRONMENT_DESCRIPTION = 'FCCTestClient 2.2.16.22'
+const {version} = require('../../package.json')
+const DEFAULT_ENVIRONMENT_DESCRIPTION = 'OakOS Payment v' + version
 
 function fpay_request(provider_config, xml, response_field, done) {
   const {host} = provider_config
@@ -148,7 +148,7 @@ const capture_xml = (provider_config, request) => {
 }
 
 const cancel_xml = (provider_config, request) => {
-  return freedompay_xml(provider_config, request, 'Cancel', 'standard_request')
+  return freedompay_xml(provider_config, request, 'Cancel')
 }
 
 module.exports = {
@@ -166,6 +166,6 @@ module.exports = {
   },
   Cancel: ({provider_config, request}, done) => {
     const xml = cancel_xml(provider_config, request)
-    fpay_request(provider_config, xml, 'standard_response', done)
+    fpay_request(provider_config, xml, 'response', done)
   }
 }

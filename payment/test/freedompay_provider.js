@@ -5,6 +5,7 @@ const {inspect} = require('util')
 const torch = require('torch')
 const uuid = require('uuid/v4')
 
+const {location_id, terminal_id} = require('./const')
 const paymentService = require('..')
 const {PROTO_PATH} = paymentService
 const host = '0.0.0.0:8008'
@@ -57,8 +58,8 @@ test('should configure the service with all required fields', (t) => {
       provider_name: 'freedompay',
       provider_type: 'FREEDOMPAY',
       host: FREEDOMPAY_HOST,
-      location_id: 'The Alamo',
-      terminal_id: 'Register 1',
+      location_id,
+      terminal_id,
     }]
   }, (err) => {
     t.error(err)
@@ -82,8 +83,8 @@ test('info should return configured', (t) => {
             api_key: '',
             batch_interval: 'OFF',
             batch_hour: 0,
-            location_id: 'The Alamo',
-            terminal_id: 'Register 1',
+            location_id,
+            terminal_id,
             environment_description: ''
           }
         ]
@@ -144,12 +145,11 @@ let last_invoice = 1
 const get_invoice_number = () => 'invoice ' + last_invoice++
 
 test('should reject a sale over the floor limit', (t) => {
-  const mref = uuid()
   const invoice_number = get_invoice_number()
   client.Sale({
     sale_request: {
       provider_name: 'freedompay',
-      merchant_ref: mref,
+      merchant_ref: invoice_number,
       invoice_number: invoice_number,
       amount: 51
     }
@@ -201,12 +201,11 @@ test('should reject a sale over the floor limit', (t) => {
 })
 
 test('should successfully process a sale', (t) => {
-  const mref = uuid()
   const invoice_number = get_invoice_number()
   client.Sale({
     sale_request: {
       provider_name: 'freedompay',
-      merchant_ref: mref,
+      merchant_ref: invoice_number,
       invoice_number: invoice_number,
       amount: 10.50
     }
@@ -247,7 +246,7 @@ test('should successfully process a sale', (t) => {
         name_on_card,
         issuer_name: card_issuer,
         expiry_date,
-        merchant_reference_code: mref,
+        merchant_reference_code: invoice_number,
         entry_mode: 'swiped',
         receipt_text,
         code: '',
