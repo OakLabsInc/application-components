@@ -157,7 +157,7 @@ function check_provider(p, index) {
 }
 
 function main (opts = {}, done = (err) => {if (err) logger.error(err)}) {
-  const host = opts.host || '0.0.0.0:8007'
+  const {host} = opts
   const server = new grpc.Server()
 
   // protobufjs automatically converts all fields to camelcase (undocumented feature)
@@ -180,7 +180,7 @@ function main (opts = {}, done = (err) => {if (err) logger.error(err)}) {
 // only start the server if we were run directly
 // otherwise just export the main function so the caller can run it
 if (require.main === module) {
-  main()
+  main(require('./config'))
 }
 
 module.exports = main

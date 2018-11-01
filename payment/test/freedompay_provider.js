@@ -5,7 +5,7 @@ const {inspect} = require('util')
 const torch = require('torch')
 const uuid = require('uuid/v4')
 
-const {location_id, terminal_id} = require('./const')
+const {location_id, terminal_id} = require('./freedompay_certification/const')
 const paymentService = require('..')
 const {PROTO_PATH} = paymentService
 const host = '0.0.0.0:8008'
@@ -98,28 +98,31 @@ test('should fail to process a sale without a merchant_ref', (t) => {
   client.Sale({
     sale_request: {
       provider_name: 'freedompay',
-      amount: 10.50
+      amount: '10.50'
     }
   }, (err, response) => {
     t.error(err)
     //torch.cyan({err, response})
-    const t_id = response.response.transaction_id
-    t.ok(t_id)
+    const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
+    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
+    t.ok(request_guid, 'request_guid')
+
     t.deepEqual(response, {
       provider_type: 'FREEDOMPAY',
       response: {
         status: 'INPUT_ERROR',
         error: '3010 Missing MerchantReferenceCode',
-        sale_amount: 0,
+        sale_amount: '0',
         currency: 'USD',
         masked_card_number: '',
         name_on_card: '',
-        transaction_id: t_id,
+        transaction_id,
         card_issuer: '',
+        request_id: '',
       },
       freedompay_response: {
-        request_guid: t_id,
-        approved_amount: 0,
+        request_guid,
+        approved_amount: '0',
         dcc_accepted: 'false',
         decision: 'E',
         error_code: '3010',
@@ -134,6 +137,8 @@ test('should fail to process a sale without a merchant_ref', (t) => {
         pin_verified: '',
         device_verified: '',
         signature_required: '',
+        request_id: '',
+        transaction_id: '',
       }
     })
     t.end()
@@ -151,41 +156,42 @@ test('should reject a sale over the floor limit', (t) => {
       provider_name: 'freedompay',
       merchant_ref: invoice_number,
       invoice_number: invoice_number,
-      amount: 51
+      amount: '51'
     }
   }, (err, response) => {
     t.error(err)
     //torch.cyan({err, response})
 
     // test dynamic fields
-    const {transaction_id, masked_card_number, name_on_card, card_issuer} = response.response
-    const {issuer_name, receipt_text} = response.freedompay_response
-    t.ok(transaction_id)
-    t.ok(masked_card_number)
-    t.equal(masked_card_number.length, 16)
-    t.ok(card_issuer)
+    const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
+    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
+    t.ok(request_guid, 'request_guid')
+    t.ok(masked_card_number, 'masked_card_number')
+    t.equal(masked_card_number.length, 16, 'card format')
+    t.ok(card_issuer, 'card_issuer')
 
     t.deepEqual(response, {
       provider_type: 'FREEDOMPAY',
       response: {
         status: 'REJECTED',
         error: 'Declined - Exceeds floor limit',
-        sale_amount: 0,
+        sale_amount: '0',
         currency: 'USD',
         masked_card_number,
         name_on_card,
         transaction_id,
         card_issuer,
+        request_id: '',
       },
       freedompay_response: {
-        request_guid: transaction_id,
-        approved_amount: 0,
+        request_guid,
+        approved_amount: '0',
         dcc_accepted: 'false',
         decision: 'R',
         error_code: '3022',
         msg: 'Declined - Exceeds floor limit',
         name_on_card: '',
-        issuer_name,
+        issuer_name: card_issuer,
         expiry_date: '',
         merchant_reference_code: '',
         entry_mode: '',
@@ -193,7 +199,9 @@ test('should reject a sale over the floor limit', (t) => {
         code: '',
         pin_verified: 'false',
         device_verified: 'false',
-        signature_required: 'true'
+        signature_required: 'true',
+        request_id: '',
+        transaction_id: '',
       }
     })
     t.end()
@@ -207,15 +215,15 @@ test('should successfully process a sale', (t) => {
       provider_name: 'freedompay',
       merchant_ref: invoice_number,
       invoice_number: invoice_number,
-      amount: 10.50
+      amount: '10.50'
     }
   }, (err, response) => {
     t.error(err)
     //torch.cyan({err, response})
 
     //// test dynamic fields
-    const {transaction_id, masked_card_number, name_on_card, card_issuer} = response.response
-    const {expiry_date, receipt_text} = response.freedompay_response
+    const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
+    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
     t.ok(transaction_id, 'transaction_id')
     t.ok(masked_card_number, 'masked_card_number exists')
     t.equal(masked_card_number.length, 16, 'masked_card_number length')
@@ -229,16 +237,17 @@ test('should successfully process a sale', (t) => {
       response: {
         status: 'ACCEPTED',
         error: '',
-        sale_amount: 10.5,
+        sale_amount: '10.50',
         currency: 'USD',
         masked_card_number: '414720XXXXXX8479',
         name_on_card: 'MASON/BRANDON ',
         transaction_id,
         card_issuer: 'VISA',
+        request_id,
       },
       freedompay_response: {
-        request_guid: transaction_id,
-        approved_amount: 10.5,
+        request_guid,
+        approved_amount: '10.50',
         dcc_accepted: 'false',
         decision: 'A',
         error_code: '3021',
@@ -253,6 +262,8 @@ test('should successfully process a sale', (t) => {
         pin_verified: 'false',
         device_verified: 'false',
         signature_required: 'false',
+        request_id,
+        transaction_id,
       }
     })
     t.end()
