@@ -1,0 +1,16 @@
+{
+  "name": "components-examples",
+  "version": "1.0.0",
+  "description": "OakOS Application Components examples module",
+  "main": "index.js",
+  "engines": {
+    "node": "10.13.0"
+  },
+  "author": "Flynn Joffray <nucleardreamer@gmail.com>",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "quick-grpc": "^1.1.0"
+  },
+  "private": true
+}
