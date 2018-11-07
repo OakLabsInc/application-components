@@ -10,4 +10,4 @@ services:
     ports:
       - "9000-9999:9000-9999"
     devices:
-      - /dev/video0
+      - /dev/video0:/dev/oak/webcam/0
