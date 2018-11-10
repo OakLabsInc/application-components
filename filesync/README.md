@@ -15,15 +15,7 @@ Requirements for use:
   uses
 * `SYNC_PERIOD` env var - how often in seconds syncing should begin; if syncing
   is ongoing then the period just restarts
-* GCP service account credentails mounted at `gcloud-credentials.json`
-
-The credentials file can be mounted or added to a custom Docker image
-like so:
-
-```
-FROM index.docker.io/oaklabs/component-filesync:0.0.1
-COPY gcloud-credentials.json /
-```
+* GCP service account credentails mounted at `/gcloud-credentials.json`
 
 This service can be signaled to wait before downloading by placing an
 empty file called `WAIT` in the top of the SYNC_DIR:
