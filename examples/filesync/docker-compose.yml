@@ -3,12 +3,12 @@ version: '3'
 volumes:
   app-persistent-storage:
 services:
-  filesync-test:
-    build: .
-    image: filesync-example
+  server:
+    image: index.docker.io/oaklabs/component-filesync:${VERSION-latest}
     volumes:
       - /dev/shm:/dev/shm
       - app-persistent-storage:/persistent
+      - ./gcloud-credentials.json:/gcloud-credentials.json:ro
     environment:
       - CONTROL_PORT=9102
       - DATA_PORT=9103
