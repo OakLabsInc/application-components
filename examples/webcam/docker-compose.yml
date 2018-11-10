@@ -1,0 +1,13 @@
+---
+version: '3'
+services:
+  server:
+    image: index.docker.io/oaklabs/component-webcam:${VERSION-latest}
+    environment:
+      - PORT=9101
+    ports:
+      - "9000-9999:9000-9999"
+    volumes:
+      - /dev/video0:/dev/oak/webcam/0
+    devices:
+      - /dev/video0
