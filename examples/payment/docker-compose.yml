@@ -1,10 +1,7 @@
 ---
 version: '3'
-
 services:
-
   server:
-    build: .
     image: index.docker.io/oaklabs/component-payment:${VERSION-latest}
     ports:
       - "9105:9105"
@@ -12,7 +9,3 @@ services:
       - PORT=9105
       - DEBUG=true
       - NODE_ENV=development
-    volumes:
-      - ./src:/app/src/
-      - ./test:/app/test/
-      - ./protos:/protos/
