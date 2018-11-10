@@ -1,10 +1,9 @@
 const { join } = require('path')
 const QuickgRPC = require('quick-grpc')
-const _ = require('lodash')
 
 async function go () {
   const { payment } = await new QuickgRPC({
-    host: 'localhost:9102',
+    host: 'localhost:9105',
     basePath: join(__dirname, '..', '..', 'payment', 'protos')
   })
 

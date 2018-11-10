@@ -1,6 +1,5 @@
 const { join } = require('path')
 const QuickgRPC = require('quick-grpc')
-const _ = require('lodash')
 
 async function go () {
   const { webcam } = await new QuickgRPC({

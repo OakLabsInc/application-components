@@ -6,9 +6,10 @@ services:
   server:
     build: .
     image: index.docker.io/oaklabs/component-payment:${VERSION-latest}
-    network_mode: host
+    ports:
+      - "9105:9105"
     environment:
-      - PORT=9102
+      - PORT=9105
       - DEBUG=true
       - NODE_ENV=development
     volumes:

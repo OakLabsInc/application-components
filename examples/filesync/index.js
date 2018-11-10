@@ -1,6 +1,5 @@
 const { join } = require('path')
 const QuickgRPC = require('quick-grpc')
-const _ = require('lodash')
 
 async function go () {
   const { filesync } = await new QuickgRPC({
