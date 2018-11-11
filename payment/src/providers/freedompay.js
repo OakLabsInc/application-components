@@ -3,14 +3,12 @@ const _ = require('lodash')
 const request = require('request')
 const uuid = require('uuid/v4')
 const {parseString} = require('xml2js')
-const torch = require('torch')
 
 const {version} = require('../../package.json')
 const DEFAULT_ENVIRONMENT_DESCRIPTION = 'OakOS Payment v' + version
 
 function fpay_request(provider_config, xml, response_field, done) {
   const {host} = provider_config
-  torch.yellow(xml)
   request({
     uri: host,
     method: 'POST',
@@ -53,7 +51,6 @@ const format_response = (response_field = 'response', done) =>
         DeviceVerified,
         SignatureRequired,
       }} = fpay_response
-      torch.yellow(RequestId)
 
       // standard response fields
       const response = {
