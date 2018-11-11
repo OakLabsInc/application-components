@@ -5,8 +5,6 @@ const {
   FREEDOMPAY_HOST,
   LOCATION_ID,
   TERMINAL_ID,
-  CC_NAME,
-  CC_NUMBER
 } = process.env
 
 const {test} = require('tape')
@@ -107,8 +105,8 @@ const expectSuccess = (t, fields = {}) => {
         error: '',
         sale_amount: amount,
         currency: 'USD',
-        masked_card_number: CC_NUMBER,
-        name_on_card: CC_NAME,
+        masked_card_number,
+        name_on_card,
         transaction_id,
         card_issuer: 'VISA',
         request_id,
@@ -124,7 +122,7 @@ const expectSuccess = (t, fields = {}) => {
         issuer_name: card_issuer,
         expiry_date,
         merchant_reference_code: shared.invoice_number,
-        entry_mode: 'swiped',
+        entry_mode: 'icc',
         receipt_text,
         code: '',
         pin_verified: 'false',
@@ -145,9 +143,9 @@ test('should successfully process an auth request', (t) => {
       provider_name: 'freedompay',
       merchant_ref: shared.invoice_number,
       invoice_number: shared.invoice_number,
-      amount: '2.01'
+      amount: '2.07'
     }
-  }, expectSuccess(t, {amount: '2.01'}))
+  }, expectSuccess(t, {amount: '2.07'}))
 })
 
 test('should successfully process a capture request', (t) => {
@@ -157,7 +155,7 @@ test('should successfully process a capture request', (t) => {
       merchant_ref: shared.invoice_number,
       request_id: shared.request_id,
       invoice_number: shared.invoice_number,
-      amount: '2.01'
+      amount: '2.07'
     }
   }, (err, response) => {
     t.error(err)
@@ -173,7 +171,7 @@ test('should successfully process a capture request', (t) => {
       response: {
         status: 'ACCEPTED',
         error: '',
-        sale_amount: '2.01',
+        sale_amount: '2.07',
         currency: 'USD',
         masked_card_number: '',
         name_on_card: '',
@@ -183,7 +181,7 @@ test('should successfully process a capture request', (t) => {
       },
       freedompay_response: {
         request_guid,
-        approved_amount: '2.01',
+        approved_amount: '2.07',
         dcc_accepted: 'false',
         decision: 'A',
         error_code: '3021',
@@ -204,76 +202,6 @@ test('should successfully process a capture request', (t) => {
     })
     t.end()
   })
-})
-
-test('user should cancel an auth request', (t) => {
-  shared.invoice_number = get_invoice_number()
-  client.Auth({
-    sale_request: {
-      provider_name: 'freedompay',
-      merchant_ref: shared.invoice_number,
-      invoice_number: shared.invoice_number,
-      amount: '2.11'
-    }
-  }, (err, response) => {
-    t.error(err)
-
-    //// test dynamic fields
-    const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
-    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
-    t.ok(transaction_id, 'transaction_id')
-    t.ok(receipt_text, 'receipt_text')
-    t.ok(request_id, 'request_id')
-    shared.request_id = request_id
-    torch.blue({request_id})
-
-    t.deepEqual(response, {
-      provider_type: 'FREEDOMPAY',
-      response: {
-        status: 'REJECTED',
-        error: 'UserCancel',
-        sale_amount: '0',
-        currency: 'USD',
-        masked_card_number: '',
-        name_on_card: '',
-        transaction_id,
-        card_issuer: '',
-        request_id,
-      },
-      freedompay_response: {
-        request_guid,
-        approved_amount: '0',
-        dcc_accepted: 'false',
-        decision: 'R',
-        error_code: '3133',
-        msg: 'UserCancel',
-        name_on_card: '',
-        issuer_name: '',
-        expiry_date: '',
-        merchant_reference_code: shared.invoice_number,
-        entry_mode: '',
-        receipt_text,
-        code: '',
-        pin_verified: 'false',
-        device_verified: 'false',
-        signature_required: 'true',
-        request_id,
-        transaction_id,
-      }
-    })
-    t.end()
-  })
-})
-
-test('system should retry an auth request', (t) => {
-  client.Auth({
-    sale_request: {
-      provider_name: 'freedompay',
-      merchant_ref: shared.invoice_number,
-      invoice_number: shared.invoice_number,
-      amount: '2.11'
-    }
-  }, expectSuccess(t, {amount: '2.11'}))
 })
 
 // otherwise the server will keep the process open

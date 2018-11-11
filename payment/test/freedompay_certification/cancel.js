@@ -1,20 +1,25 @@
-const {test} = require('tape')
-
-const grpc = require('grpc')
-const {inspect} = require('util')
+require('dotenv').config()
 const torch = require('torch')
+const {
+  HOST,
+  FREEDOMPAY_HOST,
+  LOCATION_ID,
+  TERMINAL_ID,
+  CC_NAME,
+  CC_NUMBER
+} = process.env
+
+const {test} = require('tape')
+const grpc = require('grpc')
 const uuid = require('uuid/v4')
 
-const {location_id, terminal_id} = require('./const')
 const paymentService = require('../..')
 const {PROTO_PATH} = paymentService
-const host = '0.0.0.0:8008'
-const FREEDOMPAY_HOST = 'http://10.0.1.34:1011'
 
 const shared = {}
 
 test('should start the service', (t) => {
-  paymentService({host}, t.end)
+  paymentService({host: HOST}, t.end)
 })
 
 // it's like get_type except it's actually useful
@@ -26,7 +31,7 @@ const getType = (obj) => {
 let client
 test('should create a client', (t) => {
   const {Payment} = grpc.load(PROTO_PATH).oak.platform
-  client = new Payment(host, grpc.credentials.createInsecure())
+  client = new Payment(HOST, grpc.credentials.createInsecure())
   t.end()
 })
 
@@ -36,8 +41,8 @@ test('should configure the service with all required fields', (t) => {
       provider_name: 'freedompay',
       provider_type: 'FREEDOMPAY',
       host: FREEDOMPAY_HOST,
-      location_id,
-      terminal_id,
+      location_id: LOCATION_ID,
+      terminal_id: TERMINAL_ID,
     }]
   }, (err) => {
     t.error(err)
@@ -61,8 +66,8 @@ test('info should return configured', (t) => {
             api_key: '',
             batch_interval: 'OFF',
             batch_hour: 0,
-            location_id,
-            terminal_id,
+            location_id: LOCATION_ID,
+            terminal_id: TERMINAL_ID,
             environment_description: ''
           }
         ]
@@ -108,8 +113,8 @@ test('should successfully process an auth request', (t) => {
         error: '',
         sale_amount: '2.01',
         currency: 'USD',
-        masked_card_number: '414720XXXXXX8479',
-        name_on_card: 'MASON/BRANDON ',
+        masked_card_number: CC_NUMBER,
+        name_on_card: CC_NAME,
         transaction_id,
         card_issuer: 'VISA',
         request_id,

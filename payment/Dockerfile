@@ -2,12 +2,12 @@ FROM node:9.11.1-alpine
 
 ENV NODE_ENV=production
 
-WORKDIR /src
-COPY package.json ./
+WORKDIR /payment/src
+COPY package.json /payment/
 RUN npm install && npm cache clean --force
 
-COPY src ./
+COPY src .
 
-COPY protos/ /protos
+COPY protos/ /payment/protos
 
 CMD node index.js

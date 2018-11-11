@@ -1,6 +1,6 @@
 {
   "name": "platform-payment",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Payments module for OakOS Platform",
   "main": "src/index.js",
   "dependencies": {
@@ -20,7 +20,10 @@
   "private": true,
   "devDependencies": {
     "deep-eql": "^4.0.0",
+    "dotenv": "^6.1.0",
     "faucet": "0.0.1",
+    "google-protobuf": "^3.6.1",
+    "grpc-web": "^1.0.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.1",
     "torch": "^0.2.7"
