@@ -1,12 +1,9 @@
 require('dotenv').config()
-const torch = require('torch')
 const {
   HOST,
   FREEDOMPAY_HOST,
   LOCATION_ID,
   TERMINAL_ID,
-  CC_NAME,
-  CC_NUMBER
 } = process.env
 
 const {test} = require('tape')
@@ -107,8 +104,8 @@ const expectSuccess = (t, fields = {}) => {
         error: '',
         sale_amount: amount,
         currency: 'USD',
-        masked_card_number: CC_NUMBER,
-        name_on_card: CC_NAME,
+        masked_card_number,
+        name_on_card,
         transaction_id,
         card_issuer: 'VISA',
         request_id,
@@ -225,7 +222,6 @@ test('user should cancel an auth request', (t) => {
     t.ok(receipt_text, 'receipt_text')
     t.ok(request_id, 'request_id')
     shared.request_id = request_id
-    torch.blue({request_id})
 
     t.deepEqual(response, {
       provider_type: 'FREEDOMPAY',

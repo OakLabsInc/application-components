@@ -1,7 +1,6 @@
 const {test} = require('tape')
 const grpc = require('grpc')
 const {inspect} = require('util')
-const torch = require('torch')
 
 const paymentService = require('..')
 const {PROTO_PATH} = paymentService

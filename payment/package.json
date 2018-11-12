@@ -1,9 +1,10 @@
 {
   "name": "platform-payment",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Payments module for OakOS Platform",
   "main": "src/index.js",
   "dependencies": {
+    "debug": "^4.1.0",
     "grpc": "^1.14.1",
     "lodash": "^4.17.10",
     "oak-tools": "^0.5.7",
@@ -25,7 +26,6 @@
     "google-protobuf": "^3.6.1",
     "grpc-web": "^1.0.0",
     "tap-spec": "^5.0.0",
-    "tape": "^4.9.1",
-    "torch": "^0.2.7"
+    "tape": "^4.9.1"
   }
 }

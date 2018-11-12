@@ -1,5 +1,5 @@
 require('dotenv').config()
-const torch = require('torch')
+const debug = require('debug')('test')
 const {
   HOST,
   FREEDOMPAY_HOST,

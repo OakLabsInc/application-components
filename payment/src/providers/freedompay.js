@@ -6,9 +6,11 @@ const {parseString} = require('xml2js')
 
 const {version} = require('../../package.json')
 const DEFAULT_ENVIRONMENT_DESCRIPTION = 'OakOS Payment v' + version
+const debug = require('debug')('freedompay')
 
 function fpay_request(provider_config, xml, response_field, done) {
   const {host} = provider_config
+  debug(xml)
   request({
     uri: host,
     method: 'POST',
@@ -51,6 +53,7 @@ const format_response = (response_field = 'response', done) =>
         DeviceVerified,
         SignatureRequired,
       }} = fpay_response
+      debug('%o', {RequestId})
 
       // standard response fields
       const response = {
@@ -136,7 +139,7 @@ const freedompay_xml = (provider_config, request, RequestType, request_prop) => 
 }
 
 const sale_xml = (provider_config, request) => {
-  return freedompay_xml(provider_config, request, 'Auth')
+  return freedompay_xml(provider_config, request, 'Sale')
 }
 
 const auth_xml = (provider_config, request) => {

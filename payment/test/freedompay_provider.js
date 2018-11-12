@@ -1,12 +1,9 @@
 require('dotenv').config()
-const torch = require('torch')
 const {
   HOST,
   FREEDOMPAY_HOST,
   LOCATION_ID,
   TERMINAL_ID,
-  CC_NAME,
-  CC_NUMBER
 } = process.env
 
 const {test} = require('tape')
@@ -99,7 +96,6 @@ test('should fail to process a sale without a merchant_ref', (t) => {
     }
   }, (err, response) => {
     t.error(err)
-    //torch.cyan({err, response})
     const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
     const {expiry_date, receipt_text, request_guid} = response.freedompay_response
     t.ok(request_guid, 'request_guid')
@@ -157,7 +153,6 @@ test('should reject a sale over the floor limit', (t) => {
     }
   }, (err, response) => {
     t.error(err)
-    //torch.cyan({err, response})
 
     // test dynamic fields
     const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
@@ -216,7 +211,6 @@ test('should successfully process a sale', (t) => {
     }
   }, (err, response) => {
     t.error(err)
-    //torch.cyan({err, response})
 
     //// test dynamic fields
     const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
@@ -236,8 +230,8 @@ test('should successfully process a sale', (t) => {
         error: '',
         sale_amount: '10.50',
         currency: 'USD',
-        masked_card_number: CC_NUMBER,
-        name_on_card: CC_NAME,
+        masked_card_number,
+        name_on_card,
         transaction_id,
         card_issuer: 'VISA',
         request_id,

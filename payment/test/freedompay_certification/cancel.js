@@ -1,12 +1,9 @@
 require('dotenv').config()
-const torch = require('torch')
 const {
   HOST,
   FREEDOMPAY_HOST,
   LOCATION_ID,
   TERMINAL_ID,
-  CC_NAME,
-  CC_NUMBER
 } = process.env
 
 const {test} = require('tape')
@@ -113,8 +110,8 @@ test('should successfully process an auth request', (t) => {
         error: '',
         sale_amount: '2.01',
         currency: 'USD',
-        masked_card_number: CC_NUMBER,
-        name_on_card: CC_NAME,
+        masked_card_number,
+        name_on_card,
         transaction_id,
         card_issuer: 'VISA',
         request_id,
