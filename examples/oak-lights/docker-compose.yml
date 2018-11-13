@@ -4,13 +4,12 @@ version: '3'
 services:
 
   server:
-    build: .
     image: index.docker.io/oaklabs/component-oak-lights:${VERSION-latest}
-    network_mode: host
+    ports:
+      - "9100:9100"
     environment:
       - PORT=9100
-    devices:
-      - /dev
     volumes:
-      - /dev:/dev
-      - ./src:/src/
+      - /dev/ttyACM0:/dev/oak/oak-lights/0
+    devices:
+      - /dev/ttyACM0
