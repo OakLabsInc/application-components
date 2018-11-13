@@ -1,34 +1,49 @@
-# Filesync
+# Filesync - Google Cloud Storage Syncing
 
-The syncer periodically makes sure the directory has the same files as
-the GS directory and makes the update appear instant and atomic to
-anyone else looking at that directory.
+This service will periodically, atomically sync a Google Cloud Storage
+directory to this container and server the contents over http.
 
-Since we want Filesync servers to stay mostly in sync with each
-other, the syncer will try to run every 10 minutes on the 10
-minute. It will also sync at start-up. There's a risk from the
-stampede of devices trying to update at the same time but we're
-punting on that issue for now.
+Requirements for use:
 
-Filefiesta has an `oak.yaml` file which describes its service through
-the [oakos-api](github.com/OakLabsInc/oakos-api) container. Whatever
-is in the `/live` folder will advertise itself as `assets` as it's
-root directory. You can find this on your local network like so:
+* `CONTROL_PORT` env var - port that the control gRPC interface listens on
+* `DATA_PORT` env var - port that the files are served on
+* `GS_URL` env var - gs:// url to the Google Cloud Storage directory where the
+  files are downloaded from
+* `SYNC_DIR` env var - absolute path to the directory in the container the files
+  should be stored it; this should be a persistent volume and will
+  need to have at least 2x the amount of space that the GCS directory
+  uses
+* `SYNC_PERIOD` env var - how often in seconds syncing should begin; if syncing
+  is ongoing then the period just restarts
+* GCP service account credentails mounted at `/gcloud-credentials.json`
 
-    avahi-browse -lr _assets._sub._http._tcp
+This service can be signaled to wait before downloading by placing an
+empty file called `WAIT` in the top of the SYNC_DIR:
 
-For apps that are putting files in the GS dir, you'll want clients to
-wait until you're done before downloading so they don't miss files. An
-empty file called `WAIT` in the top of the dir tells clients to wait.
+```
+# Turn waiting on
+gsutil cp /dev/null gs://path/to/sync_dir/WAIT
 
-    # Turn waiting on
-    gsutil cp /dev/null gs://filefiesta/.../WAIT
-
-    # Turn waiting off
-    gsutil rm gs://filefiesta/.../WAIT
-
+# Turn waiting off
+gsutil rm gs://path/to/sync_dir/WAIT
+```
 
 # Dev Notes
 
-Put `gcloud-credentials.json` this directory before you build. It
-should be a service account credentials file. See Google Cloud docs.
+The script `tryit.py` can be used to test the control interface. You
+can use `curl` to view the files. Here's a quick way to test the whole
+flow:
+
+```
+echo 'GS_URL=gs://your/gcs/directory/' > .env
+
+pip install grpcio grpcio-tools
+
+python -m grpc_tools.protoc -I . --python_out=. --grpc_python_out=. *.proto
+
+docker-compose up --build -d
+
+python tryit.py localhost:9102
+
+curl http://localhost:9103/
+```

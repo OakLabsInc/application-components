@@ -12,6 +12,14 @@ swap_idle_and_live () {
     mv -Tf tmp idle
 }
 
+echo "=== Verifying credentials"
+
+if ! (gsutil ls "$GS_URL" >/dev/null 2>/dev/null); then
+    echo "Credentials are invalid. Make sure /gcloud-credentials.json is present and grants read access to $GS_URL"
+    exit 1
+fi
+
+echo "=== Checking for WAIT file"
 while gsutil -q stat "$GS_URL/WAIT"; do
     echo "=== $GS_URL/WAIT exists. Waiting until it's gone..."
     sleep $WAIT_INTERVAL_SECONDS

@@ -11,9 +11,10 @@ log = logging.getLogger('filesync')
 
 class Filesync(object):
 
-    def __init__(self, gs_url, workdir, interval):
+    def __init__(self, gs_url, workdir, period):
         self.gs_url = gs_url
-        self.interval = int(interval)
+        self.period = int(period)
+        self.workdir = workdir
         self.outfile = os.path.join(workdir, OUTPUT_FILE_NAME)
         self.setup_cmd = sh.Command('bin/setup.sh').bake(
             _cwd=workdir,
@@ -44,13 +45,13 @@ class Filesync(object):
             now = time.time()
             t_next = t_last = t_ldur = t_cdur = None
             if self.time_next_start:
-                t_next = round(self.time_next_start - now, 2)
+                t_next = int(self.time_next_start - now)
             if self.time_last_done:
-                t_last = round(now - self.time_last_done, 2)
+                t_last = int(now - self.time_last_done)
             if self.time_last_start and self.time_last_done:
-                t_ldur = round(self.time_last_done - self.time_last_start, 2)
+                t_ldur = int(self.time_last_done - self.time_last_start)
             if self.time_current_start:
-                t_cdur = round(now - self.time_current_start, 2)
+                t_cdur = int(now - self.time_current_start)
             return {
                 'runsComplete': self.runs_complete,
                 'runningNow': self.proc is not None,
@@ -62,6 +63,9 @@ class Filesync(object):
 
     def begin(self):
         log.info('Starting Filesync management')
+        if not os.path.exists(self.workdir):
+            log.info('Creating working directory %r', self.workdir)
+            os.makedirs(self.workdir)
         self.setup_cmd()
         self.start_process()
 
@@ -107,8 +111,8 @@ class Filesync(object):
 
     def start_timer(self):
         now = time.time()
-        time_to_next_sync = self.interval - (now % self.interval)
-        log.info('Starting timer for %s seconds', time_to_next_sync)
+        time_to_next_sync = self.period - (now % self.period)
+        log.info('Starting timer for %s seconds', int(time_to_next_sync))
         with self.lock:
             self.timer = threading.Timer(time_to_next_sync, self.timer_done)
             self.timer.start()
