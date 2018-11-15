@@ -19,7 +19,7 @@ test('should start the service', (t) => {
 })
 
 const baseURL = `http://0.0.0.0:${REST_PROXY_PORT}/api/payment`
-let client = require('axios').create({baseURL})
+const client = require('axios').create({baseURL})
 
 test('info should return not configured', (t) => {
   client

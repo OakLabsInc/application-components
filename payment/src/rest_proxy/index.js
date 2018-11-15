@@ -7,6 +7,7 @@ const debug = require('debug')('rest')
 const _ = require('lodash')
 const {join} = require('path')
 const express = require('express')
+const cors = require('cors')
 const rel = (...paths) => join(__dirname, '../..', ...paths)
 const grpc = require('grpc')
 const protoLoader = require('@grpc/proto-loader')
@@ -30,6 +31,7 @@ module.exports = async () => {
 
   // create rest proxy server
   const app = express()
+  app.use(cors())
   app.use(require('body-parser').json())
 
   // attach grpc methods to the proxy server

@@ -1,12 +1,14 @@
 {
   "name": "component-payment",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Payments module for OakOS Platform",
   "main": "src/index.js",
   "dependencies": {
     "@grpc/proto-loader": "^0.3.0",
     "body-parser": "^1.18.3",
+    "cors": "^2.8.5",
     "debug": "^4.1.0",
+    "dotenv": "^6.1.0",
     "express": "^4.16.4",
     "grpc": "^1.14.1",
     "lodash": "^4.17.10",
@@ -15,7 +17,6 @@
     "quick-grpc": "^1.1.0",
     "request": "^2.88.0",
     "uuid": "^3.3.2",
-    "dotenv": "^6.1.0",
     "xml2js": "^0.4.19"
   },
   "scripts": {

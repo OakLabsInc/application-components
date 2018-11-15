@@ -1,0 +1,75 @@
+<html>
+  <title>Payments Test Page</title>
+  <meta http-equiv="Access-Control-Allow-Origin" content="*">
+  <body>
+
+    <div class="main">
+      <button id="info-button">Info</button>
+      <code><pre id="info-response"></pre></code>
+
+      <div>
+        <label for="freedompay-ip">IP Address of FreedomPay services on your network:</label>
+        <input type="text" id="freedompay-ip" name="freedompay-ip" required>
+      </div>
+
+      <button id="configure-button">Configure</button>
+      <code><pre id="configure-response"></pre></code>
+
+      <div>
+        <label for="sale-amount">Amount of sale:</label>
+        <input type="text" id="sale-amount" name="sale-amount" required>
+      </div>
+
+      <button id="sale-button">Sale</button>
+      <code><pre id="sale-response"></pre></code>
+
+    </div>
+
+    <script src="/axios.min.js"></script>
+    <script type="text/javascript">
+      const baseURL = `http://0.0.0.0:9143/api/payment`
+      const client = axios.create({baseURL})
+
+      const id = (selector) => document.getElementById(selector)
+      const print = (selector, data) => id(selector).textContent = JSON.stringify(data, null, 4)
+
+      function send_info() {
+        client.post('/info').then(response => {
+          print('info-response', response)
+        })
+      }
+      id('info-button').addEventListener('click', send_info)
+
+      function send_configure() {
+        client.post('/configure', {
+          providers: [{
+            provider_name: 'freedompay',
+            provider_type: 'FREEDOMPAY',
+            host: id('freedompay-ip').value,
+            location_id: '1460175013',
+            terminal_id: '2463834019',
+          }]
+        }).then(response => {
+          print('configure-response', response)
+        })
+      }
+      id('configure-button').addEventListener('click', send_configure)
+
+      let last_invoice = 1
+      const get_invoice_number = () => 'invoice ' + last_invoice++
+
+      function send_sale() {
+        const invoice_number = get_invoice_number()
+        client.post('/sale', {
+          provider_name: 'freedompay',
+          merchant_ref: invoice_number,
+          invoice_number: invoice_number,
+          amount: id('sale-amount').value,
+        }).then(response => {
+          print('sale-response', response)
+        })
+      }
+      id('sale-button').addEventListener('click', send_sale)
+    </script>
+  </body>
+</html>
