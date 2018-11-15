@@ -1,3 +1,6 @@
+require('dotenv').config()
+const {HOST} = process.env
+
 const grpc = require('grpc')
 const protobuf = require('protobufjs')
 const tools = require('oak-tools')
@@ -7,10 +10,13 @@ const {inspect} = require('util')
 const {join} = require('path')
 const rel = (...paths) => join(__dirname, '..', ...paths)
 const PROTO_PATH = rel('protos/payment.proto')
+const rest_proxy = require('./rest_proxy')
 
-const debug = process.env.DEBUG === 'true'
+const debug = require('debug')('payment')
+
+// I'm not sure we want to use this... 'debug' module probably gets the job done
 let logger = tools.logger({
-  level: debug ? 'debug' : 'info',
+  level: 'debug',
   pretty: debug
 })
 
@@ -73,6 +79,7 @@ const Implementation = {
     done(null, status)
   },
   Configure: ({request}, done) => {
+    debug('received configuration: %O', request)
 
     // validate configuration
     if (!Array.isArray(request.providers) ||
@@ -156,8 +163,7 @@ function check_provider(p, index) {
   return errors.map(e => p.provider_type + ' ' + e)
 }
 
-function main (opts = {}, done = (err) => {if (err) logger.error(err)}) {
-  const {host} = opts
+function main (done = (err) => {if (err) logger.error(err)}) {
   const server = new grpc.Server()
 
   // protobufjs automatically converts all fields to camelcase (undocumented feature)
@@ -170,17 +176,17 @@ function main (opts = {}, done = (err) => {if (err) logger.error(err)}) {
     const grpcService = protoPkg.oak.platform.Payment.service
 
     server.addService(grpcService, Implementation)
-    server.bind(host, grpc.ServerCredentials.createInsecure())
-    logger.info('Payment API server on ' + host)
+    server.bind(HOST, grpc.ServerCredentials.createInsecure())
+    logger.info('Payment API server on ' + HOST)
     server.start()
-    done()
+    rest_proxy().catch(done).then(() => done())
   })
 }
 
 // only start the server if we were run directly
 // otherwise just export the main function so the caller can run it
 if (require.main === module) {
-  main(require('./config'))
+  main()
 }
 
 module.exports = main

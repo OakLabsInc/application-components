@@ -1,19 +1,21 @@
+require('dotenv').config()
+const {HOST} = process.env
+
 const {test} = require('tape')
 const grpc = require('grpc')
 const {inspect} = require('util')
 
 const paymentService = require('..')
 const {PROTO_PATH} = paymentService
-const host = '0.0.0.0:8008'
 
 test('should start the service', (t) => {
-  paymentService({host}, t.end)
+  paymentService(t.end)
 })
 
 let client
 test('should create a client', (t) => {
   const {Payment} = grpc.load(PROTO_PATH).oak.platform
-  client = new Payment(host, grpc.credentials.createInsecure())
+  client = new Payment(HOST, grpc.credentials.createInsecure())
   t.end()
 })
 

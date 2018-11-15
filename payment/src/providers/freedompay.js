@@ -18,7 +18,7 @@ function fpay_request(provider_config, xml, response_field, done) {
   }, format_response(response_field, done))
 }
 
-Decision_response_map = {
+const Decision_response_map = {
   'A': 'ACCEPTED',
   'R': 'REJECTED',
   'F': 'INTERNAL_ERROR',
@@ -54,6 +54,7 @@ const format_response = (response_field = 'response', done) =>
         SignatureRequired,
       }} = fpay_response
       debug('%o', {RequestId})
+      //debug('%O', {RequestId, Decision, status: format_status(Decision)})
 
       // standard response fields
       const response = {

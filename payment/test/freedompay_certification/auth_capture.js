@@ -18,7 +18,7 @@ const {PROTO_PATH} = paymentService
 const shared = {}
 
 test('should start the service', (t) => {
-  paymentService({host: HOST}, t.end)
+  paymentService(t.end)
 })
 
 // it's like get_type except it's actually useful

@@ -9,7 +9,7 @@ const host = '0.0.0.0:8008'
 const FREEDOMPAY_HOST = 'http://10.0.1.34:1011'
 
 test('should start the service', (t) => {
-  paymentService({host}, t.end)
+  paymentService(t.end)
 })
 
 let client

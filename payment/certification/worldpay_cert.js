@@ -10,7 +10,7 @@ const WORLDPAY_HOST = 'http://192.168.0.64:8080'
 let client, ticketNumber = 1
 const get_invoice_number = () => ticketNumber++
 
-const service = paymentService({host}, () => {
+const service = paymentService(() => {
     const {Payment} = grpc.load(PROTO_PATH).oak.platform
     client = new Payment(host, grpc.credentials.createInsecure())
     client.Configure({

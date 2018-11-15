@@ -8,11 +8,11 @@ const {
 
 const {test} = require('tape')
 const grpc = require('grpc')
-const paymentService = require('../..')
+const paymentService = require('..')
 const {PROTO_PATH} = paymentService
 
 test('should start the service', (t) => {
-  paymentService({host: HOST}, t.end)
+  paymentService(t.end)
 })
 
 let client
@@ -79,7 +79,9 @@ test('info should return configured', (t) => {
             batch_hour: 0,
             location_id: LOCATION_ID,
             terminal_id: TERMINAL_ID,
-            environment_description: ''
+            environment_description: '',
+            application_id: 0,
+            lane_id: 0,
           }
         ]
       }
@@ -132,7 +134,8 @@ test('should fail to process a sale without a merchant_ref', (t) => {
         signature_required: '',
         request_id: '',
         transaction_id: '',
-      }
+      },
+      worldpay_response: null
     })
     t.end()
   })
@@ -142,63 +145,65 @@ test('should fail to process a sale without a merchant_ref', (t) => {
 let last_invoice = 1
 const get_invoice_number = () => 'invoice ' + last_invoice++
 
-test('should reject a sale over the floor limit', (t) => {
-  const invoice_number = get_invoice_number()
-  client.Sale({
-    sale_request: {
-      provider_name: 'freedompay',
-      merchant_ref: invoice_number,
-      invoice_number: invoice_number,
-      amount: '51'
-    }
-  }, (err, response) => {
-    t.error(err)
+// test only if gateway is disconnected
+//test('should reject a sale over the floor limit', (t) => {
+  //const invoice_number = get_invoice_number()
+  //client.Sale({
+    //sale_request: {
+      //provider_name: 'freedompay',
+      //merchant_ref: invoice_number,
+      //invoice_number: invoice_number,
+      //amount: '51'
+    //}
+  //}, (err, response) => {
+    //t.error(err)
 
-    // test dynamic fields
-    const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
-    const {expiry_date, receipt_text, request_guid} = response.freedompay_response
-    t.ok(request_guid, 'request_guid')
-    t.ok(masked_card_number, 'masked_card_number')
-    t.equal(masked_card_number.length, 16, 'card format')
-    t.ok(card_issuer, 'card_issuer')
+    //// test dynamic fields
+    //const {transaction_id, masked_card_number, name_on_card, card_issuer, request_id} = response.response
+    //const {expiry_date, receipt_text, request_guid} = response.freedompay_response
+    //t.ok(request_guid, 'request_guid')
+    //t.ok(masked_card_number, 'masked_card_number')
+    //t.equal(masked_card_number.length, 16, 'card format')
+    //t.ok(card_issuer, 'card_issuer')
 
-    t.deepEqual(response, {
-      provider_type: 'FREEDOMPAY',
-      response: {
-        status: 'REJECTED',
-        error: 'Declined - Exceeds floor limit',
-        sale_amount: '0',
-        currency: 'USD',
-        masked_card_number,
-        name_on_card,
-        transaction_id,
-        card_issuer,
-        request_id: '',
-      },
-      freedompay_response: {
-        request_guid,
-        approved_amount: '0',
-        dcc_accepted: 'false',
-        decision: 'R',
-        error_code: '3022',
-        msg: 'Declined - Exceeds floor limit',
-        name_on_card: '',
-        issuer_name: card_issuer,
-        expiry_date: '',
-        merchant_reference_code: '',
-        entry_mode: '',
-        receipt_text,
-        code: '',
-        pin_verified: 'false',
-        device_verified: 'false',
-        signature_required: 'true',
-        request_id: '',
-        transaction_id: '',
-      }
-    })
-    t.end()
-  })
-})
+    //t.deepEqual(response, {
+      //provider_type: 'FREEDOMPAY',
+      //response: {
+        //status: 'REJECTED',
+        //error: 'Declined - Exceeds floor limit',
+        //sale_amount: '0',
+        //currency: 'USD',
+        //masked_card_number,
+        //name_on_card,
+        //transaction_id,
+        //card_issuer,
+        //request_id: '',
+      //},
+      //freedompay_response: {
+        //request_guid,
+        //approved_amount: '0',
+        //dcc_accepted: 'false',
+        //decision: 'R',
+        //error_code: '3022',
+        //msg: 'Declined - Exceeds floor limit',
+        //name_on_card: '',
+        //issuer_name: card_issuer,
+        //expiry_date: '',
+        //merchant_reference_code: '',
+        //entry_mode: '',
+        //receipt_text,
+        //code: '',
+        //pin_verified: 'false',
+        //device_verified: 'false',
+        //signature_required: 'true',
+        //request_id: '',
+        //transaction_id: '',
+      //},
+      //worldpay_response: null
+    //})
+    //t.end()
+  //})
+//})
 
 test('should successfully process a sale', (t) => {
   const invoice_number = get_invoice_number()
@@ -223,7 +228,7 @@ test('should successfully process a sale', (t) => {
     t.ok(expiry_date, 'expiry_date')
     t.ok(receipt_text, 'receipt_text')
 
-    t.deepEqual(response, {
+    const expected = {
       provider_type: 'FREEDOMPAY',
       response: {
         status: 'ACCEPTED',
@@ -241,8 +246,8 @@ test('should successfully process a sale', (t) => {
         approved_amount: '10.50',
         dcc_accepted: 'false',
         decision: 'A',
-        error_code: '3021',
-        msg: 'ACCEPTED',
+        error_code: '100',
+        msg: 'APPROVED',
         name_on_card,
         issuer_name: card_issuer,
         expiry_date,
@@ -255,8 +260,10 @@ test('should successfully process a sale', (t) => {
         signature_required: 'false',
         request_id,
         transaction_id,
-      }
-    })
+      },
+      worldpay_response: null
+    }
+    t.deepEqual(response, expected)
     t.end()
   })
 })

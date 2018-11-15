@@ -1,18 +1,22 @@
 {
   "name": "component-payment",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Payments module for OakOS Platform",
   "main": "src/index.js",
   "dependencies": {
+    "@grpc/proto-loader": "^0.3.0",
+    "body-parser": "^1.18.3",
     "debug": "^4.1.0",
+    "express": "^4.16.4",
     "grpc": "^1.14.1",
     "lodash": "^4.17.10",
     "oak-tools": "^0.5.7",
     "protobufjs": "^6.8.8",
+    "quick-grpc": "^1.1.0",
     "request": "^2.88.0",
     "uuid": "^3.3.2",
-    "xml2js": "^0.4.19",
-    "body-parser": "^1.15.0"
+    "dotenv": "^6.1.0",
+    "xml2js": "^0.4.19"
   },
   "scripts": {
     "start": "node src/"
@@ -20,11 +24,12 @@
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
+    "axios": "^0.18.0",
     "deep-eql": "^4.0.0",
-    "dotenv": "^6.1.0",
     "faucet": "0.0.1",
     "google-protobuf": "^3.6.1",
     "grpc-web": "^1.0.0",
+    "querystring": "^0.2.0",
     "tap-spec": "^5.0.0",
     "tape": "^4.9.1"
   }
