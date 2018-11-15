@@ -28,8 +28,9 @@ const Decision_response_map = {
 const format_status = (Decision) => Decision_response_map[Decision] || Decision_response_map['F']
 
 const format_response = (response_field = 'response', done) =>
-  (err, {statusCode, headers}, body) => {
+  (err, res, body) => {
     if (err || !body) return done(err)
+    const {statusCode, headers} = res
     parseString(body, {explicitArray: false}, (err, fpay_response) => {
       if (err) return done(err)
       const {POSResponse: {

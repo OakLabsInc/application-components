@@ -61,10 +61,12 @@
       function send_sale() {
         const invoice_number = get_invoice_number()
         client.post('/sale', {
-          provider_name: 'freedompay',
-          merchant_ref: invoice_number,
-          invoice_number: invoice_number,
-          amount: id('sale-amount').value,
+          sale_request: {
+            provider_name: 'freedompay',
+            merchant_ref: invoice_number,
+            invoice_number: invoice_number,
+            amount: id('sale-amount').value,
+          }
         }).then(response => {
           print('sale-response', response)
         })
