@@ -2,6 +2,10 @@
 
 This is an app that can be run on OakOS and can be used to test the Payment module.  It is a simple web page with inputs and buttons to test various transactions.
 
+# Current Version
+
+Check [package.json](/package.json) for the current version.  See [Docker Hub](https://hub.docker.com/r/oaklabs/payment-demo/tags/) for version history.
+
 # Running
 
 For running on a kiosk, you probably want to run at minimum 3 containers:
