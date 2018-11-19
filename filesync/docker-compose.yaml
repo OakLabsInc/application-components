@@ -15,6 +15,7 @@ services:
       - ./filesync:/src/filesync:ro
       - ./bin:/src/bin:ro
       - ./conf:/conf:ro
+      - ./gcloud-credentials.json:/gcloud-credentials.json
     environment:
       - CONTROL_PORT=9102
       - DATA_PORT=9103
