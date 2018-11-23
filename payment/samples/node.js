@@ -136,11 +136,8 @@ test('should fail to process a sale without a merchant_ref', (t) => {
 })
 
 
-let last_invoice = 1
-const get_invoice_number = () => 'invoice ' + last_invoice++
-
 test('should reject a sale over the floor limit', (t) => {
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'freedompay',
@@ -198,7 +195,7 @@ test('should reject a sale over the floor limit', (t) => {
 })
 
 test('should successfully process a sale', (t) => {
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'freedompay',

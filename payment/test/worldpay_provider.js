@@ -1,3 +1,10 @@
+require('dotenv').config()
+const {
+  HOST,
+  FREEDOMPAY_HOST,
+  WORLDPAY_HOST,
+} = process.env
+
 const {test} = require('tape')
 
 const grpc = require('grpc')
@@ -7,11 +14,9 @@ const uuid = require('uuid/v4')
 
 const paymentService = require('../src')
 const {PROTO_PATH} = paymentService
-const host = '0.0.0.0:8000'
-const WORLDPAY_HOST = 'http://192.168.0.64:8080'
 
 test('should start the service', (t) => {
-  paymentService({host}, t.end)
+  paymentService(t.end)
 })
 
 // it's like get_type except it's actually useful
@@ -23,7 +28,7 @@ const getType = (obj) => {
 let client
 test('should create a client', (t) => {
   const {Payment} = grpc.load(PROTO_PATH).oak.platform
-  client = new Payment(host, grpc.credentials.createInsecure())
+  client = new Payment(HOST, grpc.credentials.createInsecure())
   t.end()
 })
 
@@ -100,7 +105,7 @@ test('should configure the service with all required fields', (t) => {
     providers: [{
       provider_name: 'worldpay',
       provider_type: 'WORLDPAY',
-      host: WORLDPAY_HOST,      
+      host: WORLDPAY_HOST,
       api_id: id,
       api_key: key,
       application_id: 9573,
@@ -126,7 +131,7 @@ test('info should return configured', (t) => {
             host: WORLDPAY_HOST,
             api_id: id,
             api_key: key,
-            batch_interval: 'OFF',            
+            batch_interval: 'OFF',
             batch_hour: 0,
             location_id: '',
             terminal_id: '',
@@ -185,12 +190,9 @@ test('should fail with an internal error when an invalid developer secret is sup
   })
 })
 
-let ticketNumber = 1
-const get_invoice_number = () => ticketNumber++
-
 test('should successfully process a sale', (t) => {
   key = 'a7a33930-6d7e-4d1a-88b6-8971f0db3edf' // set correct developer secret from tripos.config service
-  
+
   client.Configure({
     providers: [{
       provider_name: 'worldpay',
@@ -203,18 +205,18 @@ test('should successfully process a sale', (t) => {
     }]
   }, () => {
     let mref = uuid()
-    const invoice_number = get_invoice_number()
+    const invoice_number = uuid()
     client.Sale({
       sale_request: {
         provider_name: 'worldpay',
         amount: 1
-      }, worldpay_request: { 
+      }, worldpay_request: {
         ticketNumber: ticketNumber.toString().padStart(10, '0'),
         referenceNumber: mref
       }
     }, (err, response) => {
       t.error(err)
-      t.ok(response.worldpay_response.isApproved);    
+      t.ok(response.worldpay_response.isApproved);
       t.end()
     })
   })
@@ -224,33 +226,33 @@ test('should successfully process a sale', (t) => {
 test('should not accept a invalid sale amount value', (t) => {
   t.throws(() => {
     let mref = uuid()
-    const invoice_number = get_invoice_number()
+    const invoice_number = uuid()
     client.Sale({
       sale_request: {
         provider_name: 'worldpay',
         amount: 'abc'
-      }, worldpay_request: { 
+      }, worldpay_request: {
         ticketNumber: ticketNumber.toString().padStart(10, '0'),
         referenceNumber: mref
       }
     }, (err, response) => {
       t.error(err)
       t.end()
-    })  
+    })
   })
 
   t.end()
 })
 
 
-test('should not approve on a cancel. (Cancelled pressed on terminal)', (t) => {  
+test('should not approve on a cancel. (Cancelled pressed on terminal)', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: 20
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref
     }
@@ -260,17 +262,17 @@ test('should not approve on a cancel. (Cancelled pressed on terminal)', (t) => {
     t.equal(response.response.status, `REJECTED`)
     t.equal(response.worldpay_response.statusCode, `Cancelled`)
     t.end()
-  })  
+  })
 })
 
-test('should not approve on a cancel. (Cancelled pressed on when confirming amount)', (t) => {  
+test('should not approve on a cancel. (Cancelled pressed on when confirming amount)', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: 20
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref
     }
@@ -280,18 +282,18 @@ test('should not approve on a cancel. (Cancelled pressed on when confirming amou
     t.equal(response.response.status, `REJECTED`)
     t.equal(response.worldpay_response.statusCode, `Cancelled`)
     t.end()
-  })  
+  })
 })
 
 
-test('should not approve when a chip is removed while processing. (remove chip after confirming amount)', (t) => {  
+test('should not approve when a chip is removed while processing. (remove chip after confirming amount)', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: 20
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref
     }
@@ -301,19 +303,19 @@ test('should not approve when a chip is removed while processing. (remove chip a
     t.equal(response.response.status, `REJECTED`)
     t.equal(response.worldpay_response.statusCode, `Cancelled`)
     t.end()
-  })  
+  })
 })
 
 
 
-test('should decline a transaction.', (t) => {  
+test('should decline a transaction.', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: .20
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref
     }
@@ -323,17 +325,17 @@ test('should decline a transaction.', (t) => {
     t.equal(response.response.status, `REJECTED`)
     t.equal(response.worldpay_response.statusCode, `Failed`)
     t.end()
-  })  
+  })
 })
 
-test('should decline on a partial approval.', (t) => {  
+test('should decline on a partial approval.', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: 23.05
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref
     }
@@ -343,17 +345,17 @@ test('should decline on a partial approval.', (t) => {
     t.equal(response.response.status, `REJECTED`)
     t.equal(response.worldpay_response.statusCode, `Failed`)
     t.end()
-  })  
+  })
 })
 
-test('should approve on a partial approval when allowPartialApprovals set to true.', (t) => {  
+test('should approve on a partial approval when allowPartialApprovals set to true.', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: 23.05
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref,
       configuration: {
@@ -365,18 +367,18 @@ test('should approve on a partial approval when allowPartialApprovals set to tru
     t.ok(response.worldpay_response.isApproved)
     t.equal(response.response.status, `ACCEPTED`)
     t.end()
-  })  
+  })
 })
 
 
-test('should decline on an expired credit card.', (t) => {  
+test('should decline on an expired credit card.', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: .21
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref
     }
@@ -386,17 +388,17 @@ test('should decline on an expired credit card.', (t) => {
     t.equal(response.response.status, `REJECTED`)
     t.equal(response.worldpay_response.statusCode, `Failed`)
     t.end()
-  })  
+  })
 })
 
-test('should decline on an duplicate transaction with flag set to check for duplicates.', (t) => {  
+test('should decline on an duplicate transaction with flag set to check for duplicates.', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: .22
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref,
       configuration: {
@@ -409,17 +411,17 @@ test('should decline on an duplicate transaction with flag set to check for dupl
     t.equal(response.response.status, `REJECTED`)
     t.equal(response.worldpay_response.statusCode, `Failed`)
     t.end()
-  })  
+  })
 })
 
-test('should approve on a duplicate transaction when checkForDuplicateTransactions set to false.', (t) => {  
+test('should approve on a duplicate transaction when checkForDuplicateTransactions set to false.', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: .22
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref,
     }
@@ -428,17 +430,17 @@ test('should approve on a duplicate transaction when checkForDuplicateTransactio
     t.ok(response.worldpay_response.isApproved)
     t.equal(response.response.status, `ACCEPTED`)
     t.end()
-  })  
+  })
 })
 
-test('should not approve on a timeout. (Let the machine timeout by not swiping card)', (t) => {  
+test('should not approve on a timeout. (Let the machine timeout by not swiping card)', (t) => {
   let mref = uuid()
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   client.Sale({
     sale_request: {
       provider_name: 'worldpay',
       amount: 20
-    }, worldpay_request: { 
+    }, worldpay_request: {
       ticketNumber: ticketNumber.toString().padStart(10, '0'),
       referenceNumber: mref
     }
@@ -447,7 +449,7 @@ test('should not approve on a timeout. (Let the machine timeout by not swiping c
     t.notOk(response.worldpay_response.isApproved)
     t.equal(response.response.status, `INTERNAL_ERROR`)
     t.end()
-  })  
+  })
 })
 
 

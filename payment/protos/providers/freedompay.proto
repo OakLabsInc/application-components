@@ -6,6 +6,53 @@ message FreedomPayRequest {
   string client_environment = 1;
   string lane_id = 2;
   string request_id = 3;
+  PurchaseInformation purchase_info = 4;
+  repeated ItemLevelData items = 5;
+}
+
+// All PurchaseInformation is optional and can be provided by
+// the merchant if desired for record keeping.
+message PurchaseInformation {
+  string customer_po_number = 1; // Purchase Order number assigned to the invoice
+  string customer_po_date = 2; // Use ISO 8601 Combined Date and Time format.
+  string customer_id = 3; // Merchant assigned customer identifier.
+  string customer_code = 4; // Code assigned by the purchaser of the transaction
+}
+
+// All ItemLevelData is optional and can be provided by
+// the merchant if desired for record keeping.
+message ItemLevelData {
+  string id = 1; // Ordering of items.  Must be integer.  If left blank items are numbered automatically.
+  string tag = 2; // Used my merchant if merchant wants a non-numeric ID.
+  string discount_amount = 3; // Total discount amount applied to the line
+  string discount_flag = 4; // Y/N: used to determine the discount status of an item
+  string tax_included_flag = 5; // Y/N: This is intended primarily for e.g. movie theaters which have a ‘tax included’ pricing model to simplify making change
+  string product_code = 7;
+  string product_upc = 8;
+  string product_sku = 9;
+  string product_name = 10;
+  string product_description = 11;
+  string product_make = 12;
+  string product_model = 13;
+  string product_part_number = 14;
+  string commodity_code = 15; // Up to 11 digits for line-item classification
+  string product_year = 16; // 4 digit year
+  string product_serial1 = 17;
+  string product_serial2 = 18;
+  string product_serial3 = 19;
+  string customer_asset_id = 20;
+  string unit_price = 21; // decimal
+  uint32 quantity = 22;
+  string total_amount = 23; // decimal
+  string tax_amount = 24; // decimal
+  string promo_code = 25;
+  string freight_amount = 26;
+  string unit_of_measure = 27;
+  string sale_code = 28; // S for sale, R for return, L for Lease/Rental
+  uint32 custom_format_id = 29;
+  repeated string custom = 30; // Placement of fields is important - will be carried through to FreedomPay.  Empty string will be ignored and can be used as a spacer.
+  string orig_unit_price = 31; // used to track value before EID discounts
+  string orig_total_amount = 32; // used to track value before EID discounts
 }
 
 message FreedomPayResponse {

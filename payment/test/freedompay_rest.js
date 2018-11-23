@@ -79,11 +79,8 @@ test('info should return configured', (t) => {
     .catch(err => {t.error(err); t.end();})
 })
 
-let last_invoice = 1
-const get_invoice_number = () => 'invoice ' + last_invoice++
-
 test('should successfully process a sale', async (t) => {
-  const invoice_number = get_invoice_number()
+  const invoice_number = uuid()
   const {data} = await client.post('/sale', {
     sale_request: {
       provider_name: 'freedompay',

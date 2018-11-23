@@ -31,6 +31,7 @@ const format_response = (response_field = 'response', done) =>
   (err, res, body) => {
     if (err || !body) return done(err)
     const {statusCode, headers} = res
+    debug(body)
     parseString(body, {explicitArray: false}, (err, fpay_response) => {
       if (err) return done(err)
       const {POSResponse: {
@@ -118,7 +119,21 @@ const freedompay_xml = (provider_config, request, RequestType, request_prop) => 
   const location_id = std_request.location_id || provider_config.location_id
   const terminal_id = std_request.terminal_id || provider_config.terminal_id
   const {amount, merchant_ref, invoice_number, request_id} = std_request
-  const {lane_id} = freedompay_request
+  const {
+    client_environment,
+    lane_id,
+    purchase_info,
+    items
+  } = freedompay_request
+
+  const {
+    customer_po_number,
+    customer_po_date,
+    customer_id,
+    customer_code,
+  } = purchase_info || {}
+
+  const Items = items_xml(items)
 
   // create the output XML elements
   const fields = convert_to_xml({
@@ -133,6 +148,11 @@ const freedompay_xml = (provider_config, request, RequestType, request_prop) => 
     ClientEnvironment: environment_description,
     InvoiceNumber: invoice_number,
     LaneId: lane_id,
+    CustomerPoNumber: customer_po_number,
+    CustomerPoDate: customer_po_date,
+    CustomerId: customer_id,
+    CustomerCode: customer_code,
+    Items,
   })
 
   // wrap in root tag
@@ -140,37 +160,74 @@ const freedompay_xml = (provider_config, request, RequestType, request_prop) => 
   return xml
 }
 
-const sale_xml = (provider_config, request) => {
-  return freedompay_xml(provider_config, request, 'Sale')
+const items_xml = (items) => {
+  if (!Array.isArray(items)) return null
+  return `<Items>${items.map(item_xml).join('')}</Items>`
 }
 
-const auth_xml = (provider_config, request) => {
-  return freedompay_xml(provider_config, request, 'Auth')
+const item_xml = (item) => {
+  if (typeof item !== 'object' || _.isEmpty(item)) {
+    return ''
+  }
+  const output = convert_to_xml({
+    Id: item.id,
+    Tag: item.tag,
+    DiscountAmount: item.discount_amount,
+    DiscountFlag: item.discount_flag,
+    TaxIncludedFlag: item.tax_included_flag,
+    ProductCode: item.product_code,
+    ProductUpc: item.product_upc,
+    ProductSku: item.product_sku,
+    ProductName: item.product_name,
+    ProductDescription: item.product_description,
+    ProductMake: item.product_make,
+    ProductModel: item.product_model,
+    ProductPart_number: item.product_part_number,
+    CommodityCode: item.commodity_code,
+    ProductYear: item.product_year,
+    ProductSerial1: item.product_serial1,
+    ProductSerial2: item.product_serial2,
+    ProductSerial3: item.product_serial3,
+    CustomerAsset_id: item.customer_asset_id,
+    UnitPrice: item.unit_price,
+    Quantity: item.quantity,
+    TotalAmount: item.total_amount,
+    TaxAmount: item.tax_amount,
+    PromoCode: item.promo_code,
+    FreightAmount: item.freight_amount,
+    UnitOfMeasure: item.unit_of_measure,
+    SaleCode: item.sale_code,
+    CustomFormat_id: item.custom_format_id,
+    OrigUnitPrice: item.orig_unit_price,
+    OrigTotalAmount: item.orig_total_amount,
+
+  }).concat(custom_xml(item.custom))
+
+  return `<Item>${output}</Item>`
 }
 
-const capture_xml = (provider_config, request) => {
-  return freedompay_xml(provider_config, request, 'Capture')
-}
-
-const cancel_xml = (provider_config, request) => {
-  return freedompay_xml(provider_config, request, 'Cancel')
+const custom_xml = (custom) => {
+  if (!Array.isArray(custom)) return null
+  return custom.map((field, index) =>
+    `<Custom${index}>${field}</Custom${index}>`
+  ).join('')
 }
 
 module.exports = {
   Sale: ({provider_config, request}, done) => {
-    const xml = sale_xml(provider_config, request)
+    const xml = freedompay_xml(provider_config, request, 'Sale')
     fpay_request(provider_config, xml, 'response', done)
   },
   Auth: ({provider_config, request}, done) => {
-    const xml = auth_xml(provider_config, request)
+    const xml = freedompay_xml(provider_config, request, 'Auth')
     fpay_request(provider_config, xml, 'response', done)
   },
   Capture: ({provider_config, request}, done) => {
-    const xml = capture_xml(provider_config, request)
+    const xml = freedompay_xml(provider_config, request, 'Capture')
     fpay_request(provider_config, xml, 'response', done)
   },
   Cancel: ({provider_config, request}, done) => {
-    const xml = cancel_xml(provider_config, request)
+    const xml = freedompay_xml(provider_config, request, 'Cancel')
     fpay_request(provider_config, xml, 'response', done)
   }
 }

@@ -74,7 +74,7 @@ message StandardSaleRequest {
   Currency currency = 3;
   string transaction_id = 4;
   string location_id = 5;
-  int32 terminal_id = 6; 
+  int32 terminal_id = 6;
   string merchant_ref = 7; //required for FreedomPay
   string invoice_number = 8;
   string request_id = 9; // to capture the auth with the corresponding request_id, or other "follow-on" requests

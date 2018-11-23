@@ -13,4 +13,7 @@ COPY protos/ /payment/protos
 EXPOSE 9142
 EXPOSE 9143
 
+ENV HOST 0.0.0.0:9142
+ENV REST_PROXY_PORT 9143
+
 CMD node index.js

@@ -10,6 +10,10 @@ const {test} = require('tape')
 const grpc = require('grpc')
 const paymentService = require('..')
 const {PROTO_PATH} = paymentService
+const uuid = require('uuid/v4')
+
+let text_id = 1
+const get_text_id = () => (text_id++).toString().padStart(10, '0')
 
 test('should start the service', (t) => {
   paymentService(t.end)
@@ -142,12 +146,9 @@ test('should fail to process a sale without a merchant_ref', (t) => {
 })
 
 
-let last_invoice = 1
-const get_invoice_number = () => 'invoice ' + last_invoice++
-
 // test only if gateway is disconnected
 //test('should reject a sale over the floor limit', (t) => {
-  //const invoice_number = get_invoice_number()
+  //const invoice_number = get_text_id()
   //client.Sale({
     //sale_request: {
       //provider_name: 'freedompay',
@@ -206,13 +207,51 @@ const get_invoice_number = () => 'invoice ' + last_invoice++
 //})
 
 test('should successfully process a sale', (t) => {
-  const invoice_number = get_invoice_number()
+  const invoice_number = get_text_id()
+  const customer_id = get_text_id()
+  const customer_code = get_text_id()
+  const product_code = get_text_id()
+  const product_upc = get_text_id()
+  const product_sku = get_text_id()
+  const product_serial1 = get_text_id()
+  const customer_asset_id = get_text_id()
   client.Sale({
     sale_request: {
       provider_name: 'freedompay',
       merchant_ref: invoice_number,
-      invoice_number: invoice_number,
+      invoice_number,
       amount: '10.50'
+    },
+    freedompay_request: {
+      purchase_info: {
+        customer_po_number: invoice_number,
+        customer_po_date: '2018-11-22',
+        customer_id,
+        customer_code,
+      },
+
+      items: [{
+        discount_amount: '0',
+        discount_flag: 'N',
+        product_code,
+        product_upc,
+        product_sku,
+        product_name: 'underpants',
+        product_description: 'don\'t let the gnomes take \'em',
+        product_make: 'XL24D',
+        product_model: 'The Undertaker',
+        commodity_code: '53102300',
+        product_year: '1994',
+        product_serial1,
+        customer_asset_id,
+        unit_price: '10.00',
+        quantity: 5,
+        total_amount: '50.00',
+        tax_amount: '4.00',
+        freight_amount: '6.50',
+        unit_of_measure: 'unit',
+        sale_code: 'S',
+      }]
     }
   }, (err, response) => {
     t.error(err)
