@@ -15,9 +15,9 @@ const uuid = require('uuid/v4')
 let text_id = 1
 const get_text_id = () => (text_id++).toString().padStart(10, '0')
 
-test('should start the service', (t) => {
-  paymentService(t.end)
-})
+//test('should start the service', (t) => {
+  //paymentService(t.end)
+//})
 
 let client
 test('should create a client', (t) => {
@@ -240,7 +240,7 @@ test('should successfully process a sale', (t) => {
         product_description: 'don\'t let the gnomes take \'em',
         product_make: 'XL24D',
         product_model: 'The Undertaker',
-        commodity_code: '53102300',
+        commodity_code: '53102300', // proper UNSPSC code for undergarments
         product_year: '1994',
         product_serial1,
         customer_asset_id,

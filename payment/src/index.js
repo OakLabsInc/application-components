@@ -102,33 +102,33 @@ const Implementation = {
     return done()
   },
   Sale: (params, done) => {
-    const {provider_name} = params.request.sale_request
+    const {provider_name} = params.request.sale_request || {}
     const provider = getProviderConfig(provider_name, done)
-    if (!provider) return done(new Error(`Invalid provider ${provider_name}`))
+    if (!provider) return
     params.provider_config = provider
 
     callProviderMethod(provider.provider_type, 'Sale', params, done)
   },
   Auth: (params, done) => {
     const {provider_name} = params.request.sale_request
-    const provider = getProviderConfig(provider_name, done)
-    if (!provider) return done(new Error(`Invalid provider ${provider_name}`))
+    const provider = getProviderConfig(provider_name, done) || {}
+    if (!provider) return
     params.provider_config = provider
 
     callProviderMethod(provider.provider_type, 'Auth', params, done)
   },
   Capture: (params, done) => {
-    const {provider_name} = params.request.sale_request
+    const {provider_name} = params.request.sale_request || {}
     const provider = getProviderConfig(provider_name, done)
-    if (!provider) return done(new Error(`Invalid provider ${provider_name}`))
+    if (!provider) return
     params.provider_config = provider
 
     callProviderMethod(provider.provider_type, 'Capture', params, done)
   },
   Cancel: (params, done) => {
-    const {provider_name} = params.request.sale_request
+    const {provider_name} = params.request.sale_request || {}
     const provider = getProviderConfig(provider_name, done)
-    if (!provider) return done(new Error(`Invalid provider ${provider_name}`))
+    if (!provider) return
     params.provider_config = provider
 
     callProviderMethod(provider.provider_type, 'Cancel', params, done)

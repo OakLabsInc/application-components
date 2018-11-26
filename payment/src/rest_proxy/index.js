@@ -53,11 +53,13 @@ const attach_rpc = (app, client, namespace) => {
   const listen = (method) => {
     const path = `${namespace}/${method}`
     app.post(path, (req, res) => {
-      debug('request body: %O', req.body)
+      debug('%s request: %O', method, req.body)
       client[method](req.body, (error, result) => {
         if (error) {
+          debug('%s error: %O', method, error)
           res.status(500).json({error})
         } else {
+          debug('%s response: %O', method, result)
           res.json(result)
         }
       })
