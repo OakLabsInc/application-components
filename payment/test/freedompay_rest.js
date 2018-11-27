@@ -14,6 +14,9 @@ const grpc = require('grpc')
 const paymentService = require('..')
 const {PROTO_PATH} = paymentService
 
+let text_id = 1
+const get_text_id = () => (text_id++).toString().padStart(10, '0')
+
 test('should start the service', (t) => {
   paymentService(t.end)
 })
@@ -31,18 +34,23 @@ test('info should return not configured', (t) => {
     .catch(err => {t.error(err); t.end();})
 })
 
+const config = {
+  providers: [{
+    provider_name: 'freedompay',
+    provider_type: 'FREEDOMPAY',
+    host: FREEDOMPAY_HOST,
+    location_id: LOCATION_ID,
+    terminal_id: TERMINAL_ID,
+  }]
+}
+
+console.log(JSON.stringify(config))
+process.exit()
+
 const {inspect} = require('util')
 test('should configure the service', (t) => {
   client
-    .post('/configure', {
-      providers: [{
-        provider_name: 'freedompay',
-        provider_type: 'FREEDOMPAY',
-        host: FREEDOMPAY_HOST,
-        location_id: LOCATION_ID,
-        terminal_id: TERMINAL_ID,
-      }]
-    })
+    .post('/configure', config)
     .then(() => t.end())
     .catch(err => t.end(_.get(err, 'response.data.error.details')))
 })
@@ -80,7 +88,7 @@ test('info should return configured', (t) => {
 })
 
 test('should successfully process a sale', async (t) => {
-  const invoice_number = uuid()
+  const invoice_number = get_text_id()
   const {data} = await client.post('/sale', {
     sale_request: {
       provider_name: 'freedompay',
