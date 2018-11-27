@@ -19,27 +19,19 @@ standard_boot(test, shared)
 // configure server and check info to make sure everything is good
 fpay_standard_config(test, shared)
 
-test('should successfully process a sale request', (t) => {
-  const sale_data = fpay_level1_sale({amount: '5.01'})
+test('should successfully process a sale request with EMV card', (t) => {
+  const sale_data = fpay_level1_sale({amount: '5.08'})
   const {invoice_number} = sale_data.sale_request
 
-  shared.client.Sale(sale_data, fpay_expect_success(t, {amount: '5.01', invoice_number}))
+  shared.client.Sale(sale_data,
+    fpay_expect_success(t, {
+      amount: '5.08',
+      invoice_number,
+      card_issuer: 'DISCOVER',
+      entry_mode: 'icc',
+    })
+  )
 })
-
-test('user should cancel a sale request', (t) => {
-  shared.sale_data = fpay_level1_sale({amount: '5.13'})
-  const {invoice_number} = shared.sale_data.sale_request
-
-  shared.client.Sale(shared.sale_data, fpay_expect_user_cancel(t, {invoice_number}))
-})
-
-test('system should retry a sale request', (t) => {
-  const {invoice_number} = shared.sale_data.sale_request
-  shared.client.Sale(shared.sale_data, fpay_expect_success(t,
-    {amount: '5.13', invoice_number}
-  ))
-})
-
 
 // otherwise the server will keep the process open
 // don't know of a way to programmatically stop the GRPC server

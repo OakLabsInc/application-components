@@ -1,7 +1,7 @@
 const {
   standard_boot,
   fpay_standard_config,
-  fpay_level1_sale,
+  fpay_level3_sale,
   fpay_expect_success,
   fpay_expect_capture_success,
   fpay_expect_user_cancel,
@@ -19,27 +19,19 @@ standard_boot(test, shared)
 // configure server and check info to make sure everything is good
 fpay_standard_config(test, shared)
 
-test('should successfully process a sale request', (t) => {
-  const sale_data = fpay_level1_sale({amount: '5.01'})
+test('should successfully process a level 2 sale request', (t) => {
+  const sale_data = fpay_level3_sale({amount: '19.01'})
   const {invoice_number} = sale_data.sale_request
 
-  shared.client.Sale(sale_data, fpay_expect_success(t, {amount: '5.01', invoice_number}))
+  shared.client.Sale(sale_data, fpay_expect_success(t, {amount: '19.01', invoice_number}))
 })
 
-test('user should cancel a sale request', (t) => {
-  shared.sale_data = fpay_level1_sale({amount: '5.13'})
-  const {invoice_number} = shared.sale_data.sale_request
+test('should successfully process a level 3 sale request', (t) => {
+  const sale_data = fpay_level3_sale({amount: '19.02'})
+  const {invoice_number} = sale_data.sale_request
 
-  shared.client.Sale(shared.sale_data, fpay_expect_user_cancel(t, {invoice_number}))
+  shared.client.Sale(sale_data, fpay_expect_success(t, {amount: '19.02', invoice_number}))
 })
-
-test('system should retry a sale request', (t) => {
-  const {invoice_number} = shared.sale_data.sale_request
-  shared.client.Sale(shared.sale_data, fpay_expect_success(t,
-    {amount: '5.13', invoice_number}
-  ))
-})
-
 
 // otherwise the server will keep the process open
 // don't know of a way to programmatically stop the GRPC server
