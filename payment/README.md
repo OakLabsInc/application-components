@@ -11,7 +11,7 @@ First you will need to determine the payment gateway that you would like your ap
 
 Once you've selected a payment provider, you'll need to make sure you have the hardware that you need.  All payment providers have card scanners and local services that will need to run on the same network as your kiosk app.  Depending on the provider, some of these services may require their own physical machine due to Operating Systems dependencies or PCI requirements.  Consult the documentation for your specific payment provider for details on setting this up.
 
-[FreedomPay Setup](/docs/freedompay-setup.md)
+* [FreedomPay Setup](/docs/freedompay-setup.md)
 
 # Using Our Payment Demo App
 
@@ -44,9 +44,9 @@ The Payment module by default listens for gRPC requests on port 9142 and for RES
 
 # API Documentation
 
-[API](/docs/api.md)
-[FreedomPay Error Codes](/docs/freedompay_error_codes.pdf)
+* [API](/docs/api.md)
+* [FreedomPay Error Codes](/docs/freedompay_error_codes.pdf)
 
 # Zivelo Development Docs
 
-[Dev Process](/docs/development.md)
+* [Dev Process](/docs/development.md)
