@@ -17,7 +17,7 @@ Once you've selected a payment provider, you'll need to make sure you have the h
 
 Once you have your card scanner and provider services set up, you're ready to test with our demo app.  This will help you ensure that everything is connected properly, and to troubleshoot any issues in a simplified and well known environment.
 
-You can find [instructions for the demo app here](https://github.com/OakLabsInc/payment-demo/).
+You can find [instructions for the demo app here](https://github.com/OakLabsInc/payment-demo/).  When everything is working there, you're ready to start integration with your own app.
 
 # Testing With Your App
 
@@ -40,5 +40,13 @@ In OakOS you can run this module along side your app by adding it to the configu
 }
 ```
 
+The Payment module by default listens for gRPC requests on port 9142 and for REST requests on port 9143.  So from a web application usually the easiest thing is to make your requests at `http://0.0.0.0:9143`.  Take a look at the demo app code above for examples on exactly how to do this from a web application.
+
 # API Documentation
 
+[API](/docs/api.md)
+[FreedomPay Error Codes](/docs/freedompay_error_codes.pdf)
+
+# Zivelo Development Docs
+
+[Dev Process](/docs/development.md)
