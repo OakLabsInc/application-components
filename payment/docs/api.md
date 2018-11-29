@@ -1,0 +1,282 @@
+# Protocol Documentation
+<a name="top"/>
+
+## Table of Contents
+
+- [payment.proto](#payment.proto)
+    - [PaymentConfiguration](#oak.platform.PaymentConfiguration)
+    - [PaymentProvider](#oak.platform.PaymentProvider)
+    - [PaymentServiceInfo](#oak.platform.PaymentServiceInfo)
+    - [SaleRequest](#oak.platform.SaleRequest)
+    - [SaleResponse](#oak.platform.SaleResponse)
+    - [StandardSaleRequest](#oak.platform.StandardSaleRequest)
+    - [StandardSaleResponse](#oak.platform.StandardSaleResponse)
+  
+    - [Currency](#oak.platform.Currency)
+    - [PaymentProvider.BatchInterval](#oak.platform.PaymentProvider.BatchInterval)
+    - [PaymentProviderType](#oak.platform.PaymentProviderType)
+    - [PaymentSolutionType](#oak.platform.PaymentSolutionType)
+    - [ResponseStatus](#oak.platform.ResponseStatus)
+  
+  
+    - [Payment](#oak.platform.Payment)
+  
+
+- [Scalar Value Types](#scalar-value-types)
+
+
+
+<a name="payment.proto"/>
+<p align="right"><a href="#top">Top</a></p>
+
+## payment.proto
+
+
+
+<a name="oak.platform.PaymentConfiguration"/>
+
+### PaymentConfiguration
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| providers | [PaymentProvider](#oak.platform.PaymentProvider) | repeated |  |
+
+
+
+
+
+
+<a name="oak.platform.PaymentProvider"/>
+
+### PaymentProvider
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| provider_name | [string](#string) |  | required |
+| provider_type | [PaymentProviderType](#oak.platform.PaymentProviderType) |  | required |
+| solution | [PaymentSolutionType](#oak.platform.PaymentSolutionType) |  | optional |
+| host | [string](#string) |  | required for most solutions... location of payment service on LAN or WWW |
+| api_id | [string](#string) |  | optional... credentials for authenticated provider, WorldPay&#39;s Developer Key |
+| api_key | [string](#string) |  | optional... credentials for authenticated provider, WOrldPay&#39;s Developer Secret |
+| batch_interval | [PaymentProvider.BatchInterval](#oak.platform.PaymentProvider.BatchInterval) |  |  |
+| batch_hour | [int32](#int32) |  | 0-23 |
+| location_id | [string](#string) |  | required for FreedomPay |
+| terminal_id | [string](#string) |  | required for FreedomPay |
+| environment_description | [string](#string) |  | optional |
+| application_id | [int32](#int32) |  | required for WorldPay |
+| lane_id | [int32](#int32) |  | required for WorldPay |
+
+
+
+
+
+
+<a name="oak.platform.PaymentServiceInfo"/>
+
+### PaymentServiceInfo
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| configured | [bool](#bool) |  |  |
+| configuration | [PaymentConfiguration](#oak.platform.PaymentConfiguration) |  |  |
+
+
+
+
+
+
+<a name="oak.platform.SaleRequest"/>
+
+### SaleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| sale_request | [StandardSaleRequest](#oak.platform.StandardSaleRequest) |  |  |
+| freedompay_request | [FreedomPayRequest](#oak.platform.FreedomPayRequest) |  |  |
+| worldpay_request | [WorldPayRequest](#oak.platform.WorldPayRequest) |  |  |
+
+
+
+
+
+
+<a name="oak.platform.SaleResponse"/>
+
+### SaleResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| provider_type | [PaymentProviderType](#oak.platform.PaymentProviderType) |  |  |
+| response | [StandardSaleResponse](#oak.platform.StandardSaleResponse) |  |  |
+| freedompay_response | [FreedomPayResponse](#oak.platform.FreedomPayResponse) |  |  |
+| worldpay_response | [WorldPayResponse](#oak.platform.WorldPayResponse) |  |  |
+
+
+
+
+
+
+<a name="oak.platform.StandardSaleRequest"/>
+
+### StandardSaleRequest
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| provider_name | [string](#string) |  | one of the PaymentProviders provided in configuration |
+| amount | [string](#string) |  | string containing dollars/cents, decimal separated |
+| currency | [Currency](#oak.platform.Currency) |  |  |
+| transaction_id | [string](#string) |  |  |
+| location_id | [string](#string) |  |  |
+| terminal_id | [int32](#int32) |  |  |
+| merchant_ref | [string](#string) |  | required for FreedomPay |
+| invoice_number | [string](#string) |  |  |
+| request_id | [string](#string) |  | to capture the auth with the corresponding request_id, or other &#34;follow-on&#34; requests |
+
+
+
+
+
+
+<a name="oak.platform.StandardSaleResponse"/>
+
+### StandardSaleResponse
+
+
+
+| Field | Type | Label | Description |
+| ----- | ---- | ----- | ----------- |
+| status | [ResponseStatus](#oak.platform.ResponseStatus) |  |  |
+| error | [string](#string) |  |  |
+| sale_amount | [string](#string) |  |  |
+| currency | [Currency](#oak.platform.Currency) |  |  |
+| masked_card_number | [string](#string) |  |  |
+| name_on_card | [string](#string) |  |  |
+| transaction_id | [string](#string) |  |  |
+| card_issuer | [string](#string) |  |  |
+| request_id | [string](#string) |  | Generated by payment provider. Can be used to refer to this request in &#34;follow-on&#34; requests. |
+
+
+
+
+
+ 
+
+
+<a name="oak.platform.Currency"/>
+
+### Currency
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| USD | 0 |  |
+
+
+
+<a name="oak.platform.PaymentProvider.BatchInterval"/>
+
+### PaymentProvider.BatchInterval
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| OFF | 0 |  |
+| DAILY | 1 |  |
+| WEEKLY | 2 |  |
+
+
+
+<a name="oak.platform.PaymentProviderType"/>
+
+### PaymentProviderType
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| TEST | 0 |  |
+| FREEDOMPAY | 1 |  |
+| WORLDPAY | 2 |  |
+
+
+
+<a name="oak.platform.PaymentSolutionType"/>
+
+### PaymentSolutionType
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| DEFAULT | 0 |  |
+| POS | 1 |  |
+| CLOUD | 2 |  |
+
+
+
+<a name="oak.platform.ResponseStatus"/>
+
+### ResponseStatus
+
+
+| Name | Number | Description |
+| ---- | ------ | ----------- |
+| INTERNAL_ERROR | 0 | something internal failed |
+| ACCEPTED | 1 | success |
+| REJECTED | 2 | insufficient funds, bad card, etc. |
+| INPUT_ERROR | 3 | bad input |
+
+
+ 
+
+ 
+
+
+<a name="oak.platform.Payment"/>
+
+### Payment
+
+
+| Method Name | Request Type | Response Type | Description |
+| ----------- | ------------ | ------------- | ------------|
+| Info | [.google.protobuf.Empty](#google.protobuf.Empty) | [PaymentServiceInfo](#google.protobuf.Empty) |  |
+| Configure | [PaymentConfiguration](#oak.platform.PaymentConfiguration) | [.google.protobuf.Empty](#oak.platform.PaymentConfiguration) |  |
+| Sale | [SaleRequest](#oak.platform.SaleRequest) | [SaleResponse](#oak.platform.SaleRequest) |  |
+| Auth | [SaleRequest](#oak.platform.SaleRequest) | [SaleResponse](#oak.platform.SaleRequest) |  |
+| Capture | [SaleRequest](#oak.platform.SaleRequest) | [SaleResponse](#oak.platform.SaleRequest) |  |
+| Cancel | [SaleRequest](#oak.platform.SaleRequest) | [SaleResponse](#oak.platform.SaleRequest) |  |
+
+ 
+
+
+
+## Scalar Value Types
+
+| .proto Type | Notes | C++ Type | Java Type | Python Type |
+| ----------- | ----- | -------- | --------- | ----------- |
+| <a name="double" /> double |  | double | double | float |
+| <a name="float" /> float |  | float | float | float |
+| <a name="int32" /> int32 | Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint32 instead. | int32 | int | int |
+| <a name="int64" /> int64 | Uses variable-length encoding. Inefficient for encoding negative numbers – if your field is likely to have negative values, use sint64 instead. | int64 | long | int/long |
+| <a name="uint32" /> uint32 | Uses variable-length encoding. | uint32 | int | int/long |
+| <a name="uint64" /> uint64 | Uses variable-length encoding. | uint64 | long | int/long |
+| <a name="sint32" /> sint32 | Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int32s. | int32 | int | int |
+| <a name="sint64" /> sint64 | Uses variable-length encoding. Signed int value. These more efficiently encode negative numbers than regular int64s. | int64 | long | int/long |
+| <a name="fixed32" /> fixed32 | Always four bytes. More efficient than uint32 if values are often greater than 2^28. | uint32 | int | int |
+| <a name="fixed64" /> fixed64 | Always eight bytes. More efficient than uint64 if values are often greater than 2^56. | uint64 | long | int/long |
+| <a name="sfixed32" /> sfixed32 | Always four bytes. | int32 | int | int |
+| <a name="sfixed64" /> sfixed64 | Always eight bytes. | int64 | long | int/long |
+| <a name="bool" /> bool |  | bool | boolean | boolean |
+| <a name="string" /> string | A string must always contain UTF-8 encoded or 7-bit ASCII text. | string | String | str/unicode |
+| <a name="bytes" /> bytes | May contain any arbitrary sequence of bytes. | string | ByteString | str |
+

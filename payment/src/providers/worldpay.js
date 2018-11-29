@@ -8,7 +8,7 @@ const triPos = require('../../lib/tripos');
 
 Decision_response_map = {
   'Approved': 'ACCEPTED',
-  'Success': 'ACCEPTED',  
+  'Success': 'ACCEPTED',
   'ApprovedByMerchant': 'ACCEPTED',
   'ApprovedExceptCashback': 'ACCEPTED',
   'Declined': 'REJECTED',
@@ -36,7 +36,7 @@ Decision_response_map = {
   DeviceError
   InvalidLane
   SwipedCardIsChipCapable
-  ChipReaderError  
+  ChipReaderError
   CandidateListEmpty
   IssuerAuthenticationFailed
   CardDataEncryptionNotEnabled
@@ -61,7 +61,7 @@ const format_response = (done) =>
       card_issuer: body.cardLogo,
     }
 
-    const worldpay_response = { 
+    const worldpay_response = {
       _errors,
       _hasErrors,
       accountNumber,
@@ -83,8 +83,8 @@ const format_response = (done) =>
       transactionid,
       emv,
       pinVerified,
-      _processor    
-     } = body;
+      _processor
+    } = body;
 
     done(null, {
       provider_type: 'WORLDPAY',
@@ -97,41 +97,43 @@ const map_collection = (objects, literal) => {
   return _.map(objects, literal).join("\n");
 }
 
-const sale_request = (provider_config, {sale_request, worldpay_request}) => {  
+const sale_request = (provider_config, {sale_request, worldpay_request}) => {
+  worldpay_request || (worldpay_request = {})
   const fields = {
     laneId: provider_config.lane_id,
     transactionAmount: sale_request.amount,
-    referenceNumber: worldpay_request !== null ? worldpay_request.referenceNumber || '' : '',
-    ticketNumber: worldpay_request !== null ? worldpay_request.ticketNumber || '' : '',
-    configuration: worldpay_request !== null ? configuration_request(worldpay_request) : null
+    referenceNumber: worldpay_request.referenceNumber || '',
+    ticketNumber: worldpay_request.ticketNumber || '',
+    configuration: configuration_request(worldpay_request)
   };
 
   return fields;
 };
 
 const configuration_request = ({configuration}) => {
+  configuration || (configuration = {})
   const fields = {
-    checkForDuplicateTransactions: configuration !== null ? configuration.checkForDuplicateTransactions || false : false,
-    allowPartialApprovals: configuration !==  null ? configuration.allowPartialApprovals || false : false,
-    marketCode: configuration !== null ? configuration.marketCode || 'QSR' : 'QSR'
+    checkForDuplicateTransactions: configuration.checkForDuplicateTransactions || false,
+    allowPartialApprovals: configuration.allowPartialApprovals || false,
+    marketCode: configuration.marketCode || 'QSR'
   };
 
   return fields;
 }
 
 module.exports = {
-  Sale: ({provider_config, request}, done) => {    
+  Sale: ({provider_config, request}, done) => {
     const config = new Config(
-      `${provider_config.host}/api/v1/sale`, 
+      `${provider_config.host}/api/v1/sale`,
       provider_config.api_id,
       provider_config.api_key,
       provider_config.application_id
     );
 
     const json = sale_request(provider_config, request);
-    
+
     console.log(json);
-    
+
     triPos.makeSaleRequest(config, json, format_response(done));
   }
 }

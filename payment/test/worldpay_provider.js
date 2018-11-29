@@ -19,12 +19,6 @@ test('should start the service', (t) => {
   paymentService(t.end)
 })
 
-// it's like get_type except it's actually useful
-const getType = (obj) => {
-  const ptype = Object.prototype.toString.call(obj).slice(8, -1)
-  return ptype === 'Object' ? obj.constructor.name.toString() : ptype
-}
-
 let client
 test('should create a client', (t) => {
   const {Payment} = grpc.load(PROTO_PATH).oak.platform
