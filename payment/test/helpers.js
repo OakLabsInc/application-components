@@ -97,10 +97,7 @@ function fpay_level3_sale(args={}) {
   const invoice_number = get_text_id()
   const customer_id = get_text_id()
   const customer_code = get_text_id()
-  const product_code = get_text_id()
-  const product_upc = get_text_id()
   const product_sku = get_text_id()
-  const product_serial1 = get_text_id()
   const customer_asset_id = get_text_id()
   return {
     sale_request: {
@@ -121,16 +118,12 @@ function fpay_level3_sale(args={}) {
       items: [{
         discount_amount: '0',
         discount_flag: 'N',
-        product_code,
-        product_upc,
         product_sku,
         product_name: 'underpants',
         product_description: 'don\'t let the gnomes take \'em',
         product_make: 'XL24D',
         product_model: 'The Undertaker',
         commodity_code: '53102300', // proper UNSPSC code for undergarments
-        product_year: '1994',
-        product_serial1,
         customer_asset_id,
         unit_price: '10.00',
         quantity: 5,
@@ -163,6 +156,7 @@ function fpay_expect_success(t, fields = {}) {
   const {amount, invoice_number} = fields
   const card_issuer = fields.card_issuer || 'VISA'
   const entry_mode = fields.entry_mode || 'swiped'
+  const pin_verified = fields.pin_verified || 'false'
   return (err, response) => {
     t.error(err)
 
@@ -204,7 +198,7 @@ function fpay_expect_success(t, fields = {}) {
         entry_mode,
         receipt_text,
         code: '',
-        pin_verified: 'false',
+        pin_verified,
         device_verified: 'false',
         signature_required: 'false',
         request_id,

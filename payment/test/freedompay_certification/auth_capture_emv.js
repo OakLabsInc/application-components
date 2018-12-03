@@ -42,6 +42,30 @@ test('should successfully process a capture request with EMV card', (t) => {
   ))
 })
 
+test('should successfully process an auth request with PIN required EMV card', (t) => {
+  shared.sale_data = fpay_level1_sale({amount: '2.09'})
+  const {invoice_number} = shared.sale_data.sale_request
+
+  shared.client.Auth(shared.sale_data, (err, response) => {
+    shared.sale_data.sale_request.request_id = response.response.request_id
+    fpay_expect_success(t, {
+      amount: '2.09',
+      invoice_number,
+      card_issuer: 'VISA',
+      entry_mode: 'icc',
+      pin_verified: 'true',
+    })(err, response)
+  })
+})
+
+test('should successfully process a capture request with PIN required EMV card', (t) => {
+  const {invoice_number, request_id} = shared.sale_data.sale_request
+
+  shared.client.Capture(shared.sale_data, fpay_expect_capture_success(t,
+    {amount: '2.09', invoice_number}
+  ))
+})
+
 // otherwise the server will keep the process open
 // don't know of a way to programmatically stop the GRPC server
 // maybe reading documentation would help.  :-)
