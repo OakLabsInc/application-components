@@ -102,9 +102,12 @@ const format_response = (response_field = 'response', done) =>
   }
 
 // only include keys that have non null values
-const convert_to_xml = (object) => _.reduce(object,
-  (acc, v, k) => v ? acc.concat(`<${k}>${v}</${k}>`) : acc, [])
-  .join('')
+const convert_to_xml = (object, ns) => {
+  const xmlns = ns ? ` xmlns="${ns}"` : ''
+  return _.reduce(object,
+    (acc, v, k) => v ? acc.concat(`<${k}${xmlns}>${v}</${k}>`) : acc, [])
+    .join('')
+}
 
 const freedompay_xml = (provider_config, request, RequestType, request_prop) => {
 
@@ -201,7 +204,7 @@ const item_xml = (item) => {
     OrigUnitPrice: item.orig_unit_price,
     OrigTotalAmount: item.orig_total_amount,
 
-  }).concat(custom_xml(item.custom))
+  }, 'http://freeway.freedompay.com/').concat(custom_xml(item.custom))
 
   return `<Item>${output}</Item>`
 }
