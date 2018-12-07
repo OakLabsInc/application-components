@@ -165,44 +165,50 @@ const freedompay_xml = (provider_config, request, RequestType, request_prop) => 
 
 const items_xml = (items) => {
   if (!Array.isArray(items)) return null
-  return `<Items>${items.map(item_xml).join('')}</Items>`
+  return items.map(item_xml).join('')
 }
 
+// The FreedomPay XML parser:
+// 1) silently ignores all of these fields if they don't have the xmlns property correct
+// 2) appears to crash and drop the socket connection if there are any misspellings or
+//   capitalizations incorrect in the field names
+// 3) Fails with an internal error with no details in the response if the value is in an
+//   incorrect format (e.g. string too long)
 const item_xml = (item) => {
   if (typeof item !== 'object' || _.isEmpty(item)) {
     return ''
   }
   const output = convert_to_xml({
-    Id: item.id,
-    Tag: item.tag,
-    DiscountAmount: item.discount_amount,
-    DiscountFlag: item.discount_flag,
-    TaxIncludedFlag: item.tax_included_flag,
-    ProductCode: item.product_code,
-    ProductUpc: item.product_upc,
-    ProductSku: item.product_sku,
-    ProductName: item.product_name,
-    ProductDescription: item.product_description,
-    ProductMake: item.product_make,
-    ProductModel: item.product_model,
-    ProductPart_number: item.product_part_number,
-    CommodityCode: item.commodity_code,
-    ProductYear: item.product_year,
-    ProductSerial1: item.product_serial1,
-    ProductSerial2: item.product_serial2,
-    ProductSerial3: item.product_serial3,
-    CustomerAsset_id: item.customer_asset_id,
-    UnitPrice: item.unit_price,
-    Quantity: item.quantity,
-    TotalAmount: item.total_amount,
-    TaxAmount: item.tax_amount,
-    PromoCode: item.promo_code,
-    FreightAmount: item.freight_amount,
-    UnitOfMeasure: item.unit_of_measure,
-    SaleCode: item.sale_code,
-    CustomFormat_id: item.custom_format_id,
-    OrigUnitPrice: item.orig_unit_price,
-    OrigTotalAmount: item.orig_total_amount,
+    id: item.id,
+    tag: item.tag,
+    discountAmount: item.discount_amount,
+    discountFlag: item.discount_flag,
+    taxIncludedFlag: item.tax_included_flag,
+    productCode: item.product_code,
+    productUpc: item.product_upc,
+    productSKU: item.product_sku,
+    productName: item.product_name,
+    productDescription: item.product_description,
+    productMake: item.product_make,
+    productModel: item.product_model,
+    productPartNumber: item.product_part_number,
+    commodityCode: item.commodity_code,
+    productYear: item.product_year,
+    productSerial1: item.product_serial1,
+    productSerial2: item.product_serial2,
+    productSerial3: item.product_serial3,
+    customerAssetId: item.customer_asset_id,
+    unitPrice: item.unit_price,
+    quantity: item.quantity,
+    totalAmount: item.total_amount,
+    taxAmount: item.tax_amount,
+    promoCode: item.promo_code,
+    freightAmount: item.freight_amount,
+    unitOfMeasure: item.unit_of_measure.slice(0, 3),
+    saleCode: item.sale_code,
+    customFormatId: item.custom_format_id,
+    origUnitPrice: item.orig_unit_price,
+    origTotalAmount: item.orig_total_amount,
 
   }, 'http://freeway.freedompay.com/').concat(custom_xml(item.custom))
 

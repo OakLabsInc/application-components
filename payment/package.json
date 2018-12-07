@@ -1,6 +1,6 @@
 {
   "name": "component-payment",
-  "version": "0.0.14d",
+  "version": "0.0.15d",
   "description": "Payments module for OakOS Platform",
   "main": "src/index.js",
   "dependencies": {
