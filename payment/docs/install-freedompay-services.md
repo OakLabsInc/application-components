@@ -1,6 +1,6 @@
 FreedomPay Service Installation
 
-1. Download Freedompay Server and Client installer (Download from FreedomPay developer portal.)
+1. Download [Freedompay Server and Client installer](https://storage.cloud.google.com/oak-payments/FCC_4.1.4.38.zip).
 2. Once install is complete look for notepad in explorer, right click and run as admin (this step will save you time)
 3. In Notepad, click File->Open (do this method for the rest of the steps below) and open `C:\Program Files(x86)\FreedomPay\FreewayCommerceConnect\servers.xml`
 4. Confirm that FigaroServer is configured accordingly `<FigaroServer server="127.0.01" port="3391" />`. Update this field if you have to then save.
