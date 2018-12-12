@@ -1,3 +1,15 @@
+# Obtaining Device Management Portal Activation Keys
+
+FreedomPay’s Device Management Portal (DMP) allows for enabling features such as automatic tracking of connected devices, scheduling device firmware and data package updates, and updating device image content. In order to take advantage of these features, the FCC install must be registered using an activation key. Registration is not required, but is strongly suggested.
+
+*Note that DMP features are restricted to versions 4.1.3.6 and later.
+
+DMP Activation Keys can be obtained through the Enterprise Portal. If you do not have access to the Enterprise Portal, please contact your Account Manager to have an account created for you. Once you have logged into the Enterprise Portal, hover over the Device Management drop down in the top left corner of the page, and select Manage Activation Keys.
+
+To generate a new key, click Generate. A new key will be added to the list of available keys, and display the number of activations that have been claimed on that key. Multiple FCC installs can be activated on the same key.
+
+This key will be used later in the install process.
+
 # FreedomPay Testing Service Installation
 
 1. Log into the google account `zivelodocs@gmail.com`.  See Zivelo tech team for the password.
