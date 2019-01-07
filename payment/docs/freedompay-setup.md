@@ -17,3 +17,17 @@ For the physical setup of this hardware, you should ensure the following:
 Please talk with the Zivelo technical team when this has been completed and we can run a test purchase with the FreedomPay services to ensure that everything is connected properly.
 
 When that is done you're ready to make the connection from our OakOS Payment Sample App.
+
+# Production Support
+
+Support: open a ticket on freedompay.atlassian.net
+
+Ordering Hardware: Reach out to account manager - Courtney
+  - she'll have us fill out a form
+  - hardware will be shipped to destination
+  - can be expidited at charge of $125 per device type
+
+Standard SLA is 5 business days
+If any request pertains to more than 10 business centers, the SLA is 10 business days
+
+Sandbox/UAT environment continues to be available in tandem with production deploy.  Our customers can use the Sandbox environment - they need to be covered by NDA.
