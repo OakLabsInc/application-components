@@ -15,16 +15,25 @@ STREAMS_BY_WEBCAM_ID = {}
 
 
 def main():
+    signal.signal(signal.SIGTERM, signal_handler)
     address = '0.0.0.0:%s' % PORT
     server = make_server(address)
-    server.start()
-    print('webcam component serving on %s' % address)
 
     try:
+        server.start()
+        print('webcam component serving on %s' % address)
         while True:
             time.sleep(60 * 60 * 24)
     except KeyboardInterrupt:
-        server.stop(0)
+        server.stop(5).wait()
+
+
+class QuitException(BaseException):
+    pass
+
+
+def signal_handler(sig_num, frame):
+    raise QuitException
 
 
 def make_server(address):

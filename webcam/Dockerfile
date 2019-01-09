@@ -35,7 +35,7 @@ COPY --from=0 /protos/ /protos/
 
 ENV LD_LIBRARY_PATH=/usr/local/lib/ \
     PYTHONUNBUFFERED=yes \
-    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONDONTWRITEBYTECODE=yes \
     PYTHONPATH=/protos/
 
 CMD python server.py

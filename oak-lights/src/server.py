@@ -2,6 +2,7 @@ import concurrent.futures
 import grpc
 import os
 import serial
+import signal
 import time
 import webcolors
 
@@ -13,16 +14,26 @@ DEVICE_DIR = '/dev/oak/oak-lights/'
 
 
 def main():
+    signal.signal(signal.SIGTERM, signal_handler)
+
     address = '0.0.0.0:%s' % PORT
     server = make_server(address)
-    server.start()
-    print('oak-lights component serving on %s' % address)
 
     try:
+        server.start()
+        print('oak-lights component serving on %s' % address)
         while True:
             time.sleep(60 * 60 * 24)
-    except KeyboardInterrupt:
-        server.stop(0)
+    except (KeyboardInterrupt, QuitException):
+        server.stop(5).wait()
+
+
+class QuitException(BaseException):
+    pass
+
+
+def signal_handler(sig_num, frame):
+    raise QuitException
 
 
 def make_server(address):
@@ -41,6 +52,8 @@ class OakLightsServicer(oak_lights_pb2_grpc.OakLightsServicer):
         return oak_lights_pb2.OakLightsInformation(controllers=controllers)
 
     def ChangeColor(self, request, context):
+        if not request.controller_id:
+            raise Exception('controller_id must be specified')
         device = OakLights(os.path.join(DEVICE_DIR, request.controller_id))
         if request.WhichOneof('color') == 'rgb':
             r, g, b = request.rgb.r, request.rgb.g, request.rgb.b
