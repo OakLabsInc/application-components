@@ -25,7 +25,6 @@ class Filesync(object):
             _iter=True,
             _done=self.proc_done,
             _err_to_out=True,
-            _out=self.outfile,
             _no_pipe=True,
             _bg=True,
         )

@@ -5,8 +5,8 @@ directory to this container and server the contents over http.
 
 Requirements for use:
 
-* `CONTROL_PORT` env var - port that the control gRPC interface listens on
-* `DATA_PORT` env var - port that the files are served on
+* `CONTROL_PORT` env var - port that the control gRPC interface listens on.  {DEFAULT: 9102}
+* `DATA_PORT` env var - port that the files are served on {DEFAULT: 9103}
 * `GS_URL` env var - gs:// url to the Google Cloud Storage directory where the
   files are downloaded from
 * `SYNC_DIR` env var - absolute path to the directory in the container the files

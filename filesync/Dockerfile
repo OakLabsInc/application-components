@@ -18,7 +18,7 @@ RUN apk add --no-cache \
     libffi-dev=3.2.1-r4  \
     linux-headers \
     musl-dev \
-    nginx=1.14.0-r1 \
+    nginx=1.14.2-r0 \
     openssl-dev \
     py-cffi \
     py-cryptography \
@@ -43,6 +43,8 @@ COPY --from=protos /protos/ /protos/
 
 ENV BOTO_CONFIG=/conf/boto-config.conf \
     PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/protos/
+    PYTHONPATH=/protos/ \
+    CONTROL_PORT=9102 \
+    DATA_PORT=9103
 
 CMD /usr/bin/supervisord -c /conf/supervisor.conf
