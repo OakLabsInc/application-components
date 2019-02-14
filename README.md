@@ -14,7 +14,7 @@ The Docker image of each component is served publicly on
 DockerHub. Below are the Docker tags of the latest released version of
 each component, which are the recommended versions to use.
 
-* filesync - `index.docker.io/oaklabs/component-filesync:0.0.1`
+* filesync - [Relocated](https://github.com/OakLabsInc/component-filesync) 
 * google-fluentd - `index.docker.io/oaklabs/component-google-fluentd:0.0.1`
 * oak-lights - `index.docker.io/oaklabs/component-oak-lights:0.0.1`
 * webcam - `index.docker.io/oaklabs/component-webcam:0.0.1`

@@ -1,3 +1,0 @@
-#!/bin/bash
-# attach a bash terminal to the running filesync container for debugging
-docker exec -i -t filesync_app_1 /bin/bash
